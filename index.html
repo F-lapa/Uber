@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ganho - Motorista Pro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, #0d1b2a, #1b263b);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(27, 38, 59, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(69, 123, 157, 0.2), transparent);
+            animation: pulse 8s infinite;
+            z-index: -1;
+        }
+
+        h2 {
+            font-size: 36px;
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(to right, #457b9d, #a8dadc);
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e0e1dd;
+            background: #415a77;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(65, 90, 119, 0.4);
+        }
+
+        .input-group {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e0e1dd;
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: #1b263b;
+            padding: 0 5px;
+            transition: all 0.3s;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #415a77;
+            border-radius: 12px;
+            font-size: 16px;
+            background: rgba(65, 90, 119, 0.2);
+            color: #e0e1dd;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #a8dadc;
+            box-shadow: 0 0 10px rgba(168, 218, 220, 0.5);
+            background: rgba(65, 90, 119, 0.4);
+        }
+
+        button {
+            background: linear-gradient(135deg, #457b9d, #1d3557);
+            color: #e0e1dd;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 20px rgba(69, 123, 157, 0.5);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #1d3557, #0d1b2a);
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(29, 53, 87, 0.7);
+        }
+
+        #resultado, #resultadoDiario, #listaMensal {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(65, 90, 119, 0.3);
+            border-radius: 15px;
+            font-size: 16px;
+            text-align: center;
+            color: #e0e1dd;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.5s ease-in-out;
+        }
+
+        .section {
+            margin-top: 40px;
+            padding-top: 30px;
+            position: relative;
+        }
+
+        #listaMensal ul {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        #listaMensal li {
+            padding: 15px;
+            background: linear-gradient(90deg, #415a77, #33475b);
+            margin: 10px 0;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #e0e1dd;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #listaMensal li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #listaMensal li button {
+            background: #e63946;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: auto;
+            margin: 0;
+            box-shadow: none;
+        }
+
+        #listaMensal li button:hover {
+            background: #b32d38;
+            transform: scale(1.1);
+        }
+
+        #listaMensal p {
+            font-size: 18px;
+            font-weight: 600;
+            color: #a8dadc;
+            background: rgba(69, 123, 157, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        /* Estilo da Caixa de Diálogo Personalizada */
+        #dialogOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 27, 42, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #dialogBox {
+            background: #1b263b;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            color: #e0e1dd;
+            animation: slideUp 0.3s ease-in-out;
+        }
+
+        #dialogBox p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        #dialogBox .dialog-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        #dialogBox button {
+            width: 120px;
+            padding: 10px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        #dialogConfirm {
+            background: linear-gradient(135deg, #457b9d, #1d3557);
+        }
+
+        #dialogConfirm:hover {
+            background: linear-gradient(135deg, #1d3557, #0d1b2a);
+        }
+
+        #dialogCancel {
+            background: #e63946;
+        }
+
+        #dialogCancel:hover {
+            background: #b32d38;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 28px;
+            }
+            button, input {
+                font-size: 14px;
+            }
+            #listaMensal li {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Calculadora de Ganho</h2>
+        
+        <div class="input-group">
+            <label>KM para buscar</label>
+            <input type="number" id="kmBusca" step="0.1" min="0" placeholder="Ex: 5.5">
+        </div>
+
+        <div class="input-group">
+            <label>KM da viagem</label>
+            <input type="number" id="kmViagem" step="0.1" min="0" placeholder="Ex: 10.2">
+        </div>
+
+        <div class="input-group">
+            <label>Valor recebido (R$)</label>
+            <input type="number" id="valorRecebido" step="0.01" min="0" placeholder="Ex: 25.50">
+        </div>
+
+        <button onclick="calcularGanho()">Calcular Ganho por KM</button>
+        <div id="resultado"></div>
+
+        <div class="section">
+            <h3>Cálculo Diário</h3>
+            
+            <div class="input-group">
+                <label>KM total do dia</label>
+                <input type="number" id="kmTotalDia" step="0.1" min="0" placeholder="Ex: 150.5">
+            </div>
+
+            <div class="input-group">
+                <label>Consumo (km/L)</label>
+                <input type="number" id="consumo" step="0.1" min="0" placeholder="Ex: 12.5">
+            </div>
+
+            <div class="input-group">
+                <label>Preço do combustível (R$/L)</label>
+                <input type="number" id="precoCombustivel" step="0.01" min="0" placeholder="Ex: 5.80">
+            </div>
+
+            <div class="input-group">
+                <label>Ganho total do dia (R$)</label>
+                <input type="number" id="ganhoTotalDia" step="0.01" min="0" placeholder="Ex: 250.00">
+            </div>
+
+            <div class="input-group">
+                <label>Horas trabalhadas</label>
+                <input type="number" id="horasTrabalhadas" step="0.1" min="0" placeholder="Ex: 8.5">
+            </div>
+
+            <button onclick="calcularDiario()">Calcular Lucro Diário</button>
+            <div id="resultadoDiario"></div>
+
+            <div class="section">
+                <h3>Ganhos no Mês</h3>
+                <div id="listaMensal"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Caixa de Diálogo Personalizada -->
+    <div id="dialogOverlay">
+        <div id="dialogBox">
+            <p>Tem certeza que deseja deletar este item?</p>
+            <div class="dialog-buttons">
+                <button id="dialogConfirm">Sim</button>
+                <button id="dialogCancel">Não</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ganhosMensais = JSON.parse(localStorage.getItem('ganhosMensais')) || [];
+        atualizarListaMensal();
+
+        function calcularGanho() {
+            const kmBusca = parseFloat(document.getElementById('kmBusca').value) || 0;
+            const kmViagem = parseFloat(document.getElementById('kmViagem').value) || 0;
+            const valorRecebido = parseFloat(document.getElementById('valorRecebido').value) || 0;
+            const kmTotal = kmBusca + kmViagem;
+
+            if (kmTotal <= 0 || valorRecebido <= 0) {
+                alert('Por favor, insira valores válidos maiores que zero para a corrida.');
+                return;
+            }
+
+            const ganhoPorKm = valorRecebido / kmTotal;
+
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.style.display = 'block';
+            resultadoDiv.innerHTML = `
+                KM Total da Corrida: ${kmTotal.toFixed(1)} km<br>
+                Valor Recebido: R$ ${valorRecebido.toFixed(2)}<br>
+                <strong>Ganho por KM: R$ ${ganhoPorKm.toFixed(2)}</strong>
+            `;
+        }
+
+        function calcularDiario() {
+            const kmTotalDia = parseFloat(document.getElementById('kmTotalDia').value) || 0;
+            const consumo = parseFloat(document.getElementById('consumo').value) || 0;
+            const precoCombustivel = parseFloat(document.getElementById('precoCombustivel').value) || 0;
+            const ganhoTotalDia = parseFloat(document.getElementById('ganhoTotalDia').value) || 0;
+            const horasTrabalhadas = parseFloat(document.getElementById('horasTrabalhadas').value) || 0;
+
+            if (kmTotalDia <= 0 || consumo <= 0 || precoCombustivel <= 0 || ganhoTotalDia <= 0 || horasTrabalhadas <= 0) {
+                alert('Por favor, insira todos os valores válidos maiores que zero para o cálculo diário.');
+                return;
+            }
+
+            const litrosConsumidos = kmTotalDia / consumo;
+            const gastoCombustivel = litrosConsumidos * precoCombustivel;
+            const lucroLiquido = ganhoTotalDia - gastoCombustivel;
+            const ganhoPorHora = lucroLiquido / horasTrabalhadas;
+
+            const data = new Date().toLocaleDateString('pt-BR');
+            ganhosMensais.push({ data, lucro: lucroLiquido });
+            salvarDados();
+
+            const resultadoDiarioDiv = document.getElementById('resultadoDiario');
+            resultadoDiarioDiv.style.display = 'block';
+            resultadoDiarioDiv.innerHTML = `
+                KM Total do Dia: ${kmTotalDia.toFixed(1)} km<br>
+                Litros Consumidos: ${litrosConsumidos.toFixed(2)} L<br>
+                Gasto com Combustível: R$ ${gastoCombustivel.toFixed(2)}<br>
+                Ganho Total: R$ ${ganhoTotalDia.toFixed(2)}<br>
+                Horas Trabalhadas: ${horasTrabalhadas.toFixed(1)} h<br>
+                Lucro Líquido: R$ ${lucroLiquido.toFixed(2)}<br>
+                <strong>Ganho por Hora: R$ ${ganhoPorHora.toFixed(2)}</strong>
+            `;
+
+            atualizarListaMensal();
+        }
+
+        function atualizarListaMensal() {
+            const listaMensalDiv = document.getElementById('listaMensal');
+            listaMensalDiv.style.display = 'block';
+
+            let totalMensal = 0;
+            let listaHTML = '<ul>';
+            ganhosMensais.forEach((ganho, index) => {
+                listaHTML += `
+                    <li>
+                        ${ganho.data}: R$ ${ganho.lucro.toFixed(2)}
+                        <button onclick="mostrarDialog(${index})">Deletar</button>
+                    </li>`;
+                totalMensal += ganho.lucro;
+            });
+            listaHTML += '</ul>';
+            listaHTML += `<p>Total no Mês: R$ ${totalMensal.toFixed(2)}</p>`;
+
+            listaMensalDiv.innerHTML = listaHTML;
+        }
+
+        let itemParaDeletar = null;
+
+        function mostrarDialog(index) {
+            itemParaDeletar = index;
+            const dialogOverlay = document.getElementById('dialogOverlay');
+            dialogOverlay.style.display = 'flex';
+
+            document.getElementById('dialogConfirm').onclick = () => {
+                deletarItem(index);
+                dialogOverlay.style.display = 'none';
+            };
+
+            document.getElementById('dialogCancel').onclick = () => {
+                dialogOverlay.style.display = 'none';
+                itemParaDeletar = null;
+            };
+        }
+
+        function deletarItem(index) {
+            ganhosMensais.splice(index, 1);
+            salvarDados();
+            atualizarListaMensal();
+        }
+
+        function salvarDados() {
+            localStorage.setItem('ganhosMensais', JSON.stringify(ganhosMensais));
+        }
+    </script>
+</body>
+</html>
