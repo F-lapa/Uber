@@ -333,7 +333,7 @@
 
             <div class="input-group">
                 <label>Horas trabalhadas</label>
-                <input type="text" id="horasTrabalhadas" placeholder="Ex: 8h 30min" oninput="formatarHoras(this)">
+                <input type="tel" id="horasTrabalhadas" maxlength="9" placeholder="Ex: 08h 30min" oninput="formatarHoras(this)">
             </div>
 
             <button onclick="calcularDiario()">Calcular Lucro Diário</button>
@@ -385,23 +385,29 @@
 
         // Função para formatar horas e minutos enquanto o usuário digita
         function formatarHoras(input) {
-            let valor = input.value.replace(/[^0-9.,]/g, ''); // Remove tudo exceto números, ponto ou vírgula
-            valor = valor.replace(',', '.'); // Normaliza para ponto decimal
+            // Remove tudo exceto números
+            let valor = input.value.replace(/[^0-9]/g, '');
 
-            if (valor === '' || isNaN(parseFloat(valor))) {
+            // Limita a entrada a 4 dígitos
+            if (valor.length > 4) {
+                valor = valor.slice(0, 4);
+            }
+
+            // Formata conforme o número de dígitos
+            if (valor.length === 0) {
                 input.value = '';
                 return;
             }
 
-            const numero = parseFloat(valor);
-            const horas = Math.floor(numero); // Parte inteira (horas)
-            const minutos = Math.round((numero - horas) * 60); // Parte decimal convertida em minutos
+            let horas = valor.length >= 1 ? valor.slice(0, 2) : '00';
+            let minutos = valor.length >= 3 ? valor.slice(2, 4) : '00';
 
-            if (minutos >= 60) {
-                input.value = `${horas + 1}h 0min`;
-            } else {
-                input.value = `${horas}h ${minutos}min`;
-            }
+            // Valida horas e minutos
+            horas = parseInt(horas) > 23 ? '23' : horas.padStart(2, '0');
+            minutos = parseInt(minutos) > 59 ? '59' : minutos.padStart(2, '0');
+
+            // Atualiza o valor no campo
+            input.value = `${horas}h ${minutos}min`;
         }
 
         function calcularDiario() {
@@ -411,7 +417,7 @@
             const ganhoTotalDia = parseFloat(document.getElementById('ganhoTotalDia').value) || 0;
             let horasTrabalhadasInput = document.getElementById('horasTrabalhadas').value;
 
-            // Converter o formato "Xh Ymin" para número decimal
+            // Converter o formato "HHh MMmin" para número decimal
             const regex = /(\d+)h\s*(\d+)min/;
             const match = horasTrabalhadasInput.match(regex);
             let horasTrabalhadas = 0;
@@ -420,7 +426,7 @@
                 const minutos = parseInt(match[2]) || 0;
                 horasTrabalhadas = horas + (minutos / 60);
             } else {
-                horasTrabalhadas = parseFloat(horasTrabalhadasInput) || 0; // Fallback caso não esteja no formato esperado
+                horasTrabalhadas = 0; // Caso o formato esteja incorreto
             }
 
             if (kmTotalDia <= 0 || consumo <= 0 || precoCombustivel <= 0 || ganhoTotalDia <= 0 || horasTrabalhadas <= 0) {
