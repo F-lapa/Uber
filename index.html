@@ -393,21 +393,41 @@
                 valor = valor.slice(0, 4);
             }
 
-            // Formata conforme o número de dígitos
+            // Se não houver nada, deixa o campo vazio
             if (valor.length === 0) {
                 input.value = '';
                 return;
             }
 
-            let horas = valor.length >= 1 ? valor.slice(0, 2) : '00';
-            let minutos = valor.length >= 3 ? valor.slice(2, 4) : '00';
-
-            // Valida horas e minutos
-            horas = parseInt(horas) > 23 ? '23' : horas.padStart(2, '0');
-            minutos = parseInt(minutos) > 59 ? '59' : minutos.padStart(2, '0');
+            // Formata conforme o número de dígitos
+            let formattedValue = '';
+            if (valor.length >= 1 && valor.length <= 2) {
+                // Apenas horas
+                let horas = valor;
+                if (parseInt(horas) > 23) {
+                    horas = '23';
+                    valor = horas;
+                }
+                formattedValue = `${horas}h`;
+            } else if (valor.length >= 3) {
+                // Horas e minutos
+                let horas = valor.slice(0, 2);
+                let minutos = valor.slice(2, 4);
+                if (parseInt(horas) > 23) {
+                    horas = '23';
+                }
+                if (parseInt(minutos) > 59) {
+                    minutos = '59';
+                    valor = horas + minutos;
+                }
+                formattedValue = `${horas}h ${minutos}min`;
+            }
 
             // Atualiza o valor no campo
-            input.value = `${horas}h ${minutos}min`;
+            input.value = formattedValue;
+
+            // Mantém o cursor no final
+            input.setSelectionRange(formattedValue.length, formattedValue.length);
         }
 
         function calcularDiario() {
@@ -417,16 +437,23 @@
             const ganhoTotalDia = parseFloat(document.getElementById('ganhoTotalDia').value) || 0;
             let horasTrabalhadasInput = document.getElementById('horasTrabalhadas').value;
 
-            // Converter o formato "HHh MMmin" para número decimal
-            const regex = /(\d+)h\s*(\d+)min/;
-            const match = horasTrabalhadasInput.match(regex);
+            // Converter o formato "HHh" ou "HHh MMmin" para número decimal
             let horasTrabalhadas = 0;
-            if (match) {
-                const horas = parseInt(match[1]) || 0;
-                const minutos = parseInt(match[2]) || 0;
-                horasTrabalhadas = horas + (minutos / 60);
-            } else {
-                horasTrabalhadas = 0; // Caso o formato esteja incorreto
+            if (horasTrabalhadasInput.includes('h') && horasTrabalhadasInput.includes('min')) {
+                const regex = /(\d+)h\s*(\d+)min/;
+                const match = horasTrabalhadasInput.match(regex);
+                if (match) {
+                    const horas = parseInt(match[1]) || 0;
+                    const minutos = parseInt(match[2]) || 0;
+                    horasTrabalhadas = horas + (minutos / 60);
+                }
+            } else if (horasTrabalhadasInput.includes('h')) {
+                const regex = /(\d+)h/;
+                const match = horasTrabalhadasInput.match(regex);
+                if (match) {
+                    const horas = parseInt(match[1]) || 0;
+                    horasTrabalhadas = horas;
+                }
             }
 
             if (kmTotalDia <= 0 || consumo <= 0 || precoCombustivel <= 0 || ganhoTotalDia <= 0 || horasTrabalhadas <= 0) {
