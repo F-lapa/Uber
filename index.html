@@ -279,7 +279,7 @@
         #detalhesBox .detalhes-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px 15px; /* Reduzido o gap para eliminar espaços */
+            gap: 10px 15px;
             font-size: 14px;
         }
 
@@ -670,7 +670,7 @@
                     <span>Litros Consumidos</span>
                     ${(ganho.kmTotalDia / ganho.consumo).toFixed(2)} L
                 </div>
-                <div class="detalhes-item highlight">
+                <div class="detalhes-item">
                     <span>Ganho por KM</span>
                     R$ ${ganho.ganhoPorKm.toFixed(2)}
                 </div>
