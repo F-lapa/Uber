@@ -320,6 +320,7 @@
             border-radius: 10px;
             color: #1b263b;
             transition: all 0.3s ease;
+            margin-top: 10px;
         }
 
         #detalhesBox .lucro-highlight:hover {
@@ -470,9 +471,8 @@
             <button onclick="mostrarGanhosAno()">Ganhos no Ano</button>
             <h3>Ganhos no Mês</h3>
             <div class="input-group">
-                <label>Filtrar por Mês</label>
+                <label>Selecionar Mês</label>
                 <select id="filtroMes" onchange="atualizarListaMensal()">
-                    <option value="">Todos os meses</option>
                     <option value="01">Janeiro</option>
                     <option value="02">Fevereiro</option>
                     <option value="03">Março</option>
@@ -522,7 +522,13 @@
 
     <script>
         let ganhosMensais = JSON.parse(localStorage.getItem('ganhosMensais')) || [];
-        atualizarListaMensal();
+
+        // Pré-selecionar o mês atual
+        const mesAtual = new Date().getMonth() + 1; // Janeiro = 0, ajusta para 1-12
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('filtroMes').value = mesAtual.toString().padStart(2, '0');
+            atualizarListaMensal();
+        });
 
         function formatarHoras(input) {
             let valor = input.value.replace(/[^0-9]/g, '');
@@ -618,15 +624,14 @@
 
             let totalMensal = 0;
             let listaHTML = '<ul>';
-            const ganhosFiltrados = filtroMes 
-                ? ganhosMensais.filter(ganho => ganho.data.split('/')[1] === filtroMes)
-                : ganhosMensais;
+            const ganhosFiltrados = ganhosMensais.filter(ganho => ganho.data.split('/')[1] === filtroMes);
 
             ganhosFiltrados.forEach((ganho, index) => {
+                const originalIndex = ganhosMensais.indexOf(ganho);
                 listaHTML += `
-                    <li onclick="mostrarDetalhes(${ganhosMensais.indexOf(ganho)})">
+                    <li onclick="mostrarDetalhes(${originalIndex})">
                         ${ganho.data}: R$ ${ganho.lucro.toFixed(2)}
-                        <button onclick="event.stopPropagation(); mostrarDialog(${ganhosMensais.indexOf(ganho)})">Deletar</button>
+                        <button onclick="event.stopPropagation(); mostrarDialog(${originalIndex})">Deletar</button>
                     </li>`;
                 totalMensal += ganho.lucro;
             });
@@ -647,6 +652,10 @@
                     ${ganho.data}
                 </div>
                 <div class="detalhes-item">
+                    <span>Horas Trabalhadas</span>
+                    ${ganho.horasTrabalhadasInput}
+                </div>
+                <div class="detalhes-item">
                     <span>KM Total</span>
                     ${ganho.kmTotalDia.toFixed(1)} km
                 </div>
@@ -655,16 +664,12 @@
                     R$ ${ganho.ganhoTotalDia.toFixed(2)}
                 </div>
                 <div class="detalhes-item">
-                    <span>Horas Trabalhadas</span>
-                    ${ganho.horasTrabalhadasInput}
+                    <span>Gasto Combustível</span>
+                    R$ ${(ganho.kmTotalDia / ganho.consumo * ganho.precoCombustivel).toFixed(2)}
                 </div>
                 <div class="detalhes-item">
                     <span>Litros Consumidos</span>
                     ${(ganho.kmTotalDia / ganho.consumo).toFixed(2)} L
-                </div>
-                <div class="detalhes-item">
-                    <span>Gasto Combustível</span>
-                    R$ ${(ganho.kmTotalDia / ganho.consumo * ganho.precoCombustivel).toFixed(2)}
                 </div>
                 <div class="detalhes-item highlight">
                     <span>Ganho por KM</span>
