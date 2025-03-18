@@ -310,6 +310,24 @@
             border: 1px solid #a8dadc;
         }
 
+        #detalhesBox .lucro-highlight {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #457b9d, #a8dadc);
+            border: 2px solid #e0e1dd;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(168, 218, 220, 0.5);
+            border-radius: 10px;
+            color: #1b263b;
+            transition: all 0.3s ease;
+        }
+
+        #detalhesBox .lucro-highlight:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(168, 218, 220, 0.7);
+        }
+
         #detalhesBox button {
             margin-top: 20px;
             width: 100%;
@@ -450,8 +468,8 @@
 
             <div class="section">
                 <h3>Ganhos no Mês</h3>
-                <div id="listaMensal"></div>
                 <button onclick="mostrarGanhosAno()">Ganhos no Ano</button>
+                <div id="listaMensal"></div>
             </div>
         </div>
     </div>
@@ -635,7 +653,7 @@
                     <span>Ganho por Hora</span>
                     R$ ${ganho.ganhoPorHora.toFixed(2)}
                 </div>
-                <div class="detalhes-item">
+                <div class="detalhes-item lucro-highlight">
                     <span>Lucro Líquido</span>
                     R$ ${ganho.lucro.toFixed(2)}
                 </div>
@@ -651,7 +669,6 @@
             const anoOverlay = document.getElementById('anoOverlay');
             const anoContent = document.getElementById('anoContent');
 
-            // Agrupar ganhos por mês
             const ganhosPorMes = {};
             ganhosMensais.forEach(ganho => {
                 const [dia, mes, ano] = ganho.data.split('/');
@@ -662,10 +679,8 @@
                 ganhosPorMes[mesAno] += ganho.lucro;
             });
 
-            // Calcular total do ano
             const totalAno = Object.values(ganhosPorMes).reduce((acc, val) => acc + val, 0);
 
-            // Gerar HTML
             let contentHTML = '';
             for (const [mesAno, total] of Object.entries(ganhosPorMes)) {
                 contentHTML += `
