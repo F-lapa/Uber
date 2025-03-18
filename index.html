@@ -617,7 +617,7 @@
         <div id="detalhesBox">
             <h4>Detalhes do Dia</h4>
             <div class="detalhes-content" id="detalhesContent"></div>
-            <button id="detalhesClose">Fechar</button>
+            <button id="detalhesClose" class="modal-close">Fechar</button>
         </div>
     </div>
 
@@ -626,7 +626,7 @@
         <div id="anoBox">
             <h4>Ganhos no Ano</h4>
             <div class="ano-content" id="anoContent"></div>
-            <button id="anoClose">Fechar</button>
+            <button id="anoClose" class="modal-close">Fechar</button>
         </div>
     </div>
 
@@ -639,9 +639,15 @@
             document.getElementById('filtroMes').value = mesAtual.toString().padStart(2, '0');
             atualizarListaMensal();
 
-            // Associar o evento ao botão "Fechar" do modal de Ganhos no Ano
-            const anoCloseButton = document.getElementById('anoClose');
-            anoCloseButton.addEventListener('click', fecharModalAno);
+            // Gerenciar o fechamento de todos os modais com uma única função
+            document.querySelectorAll('.modal-close').forEach(button => {
+                button.addEventListener('click', () => {
+                    const overlays = document.querySelectorAll('#dialogOverlay, #detalhesOverlay, #anoOverlay');
+                    overlays.forEach(overlay => {
+                        overlay.style.display = 'none';
+                    });
+                });
+            });
         });
 
         function formatarHoras(input) {
@@ -800,9 +806,6 @@
             `;
 
             detalhesOverlay.style.display = 'flex';
-            document.getElementById('detalhesClose').onclick = () => {
-                detalhesOverlay.style.display = 'none';
-            };
         }
 
         function mostrarGanhosAno() {
@@ -828,7 +831,7 @@
                     <div class="ano-item">
                         <span>${mesAno}</span>
                         <span>R$ ${data.total.toFixed(2)}</span>
-                        <button onclick="event.stopPropagation(); mostrarDialogAno('${mesAno}')">Deletar</button>
+                        <button onclick="mostrarDialogAno('${mesAno}', ${JSON.stringify(data.indices)})">Deletar</button>
                     </div>`;
             }
             contentHTML += `
@@ -840,14 +843,7 @@
             anoOverlay.style.display = 'flex';
         }
 
-        function fecharModalAno() {
-            const anoOverlay = document.getElementById('anoOverlay');
-            if (anoOverlay) {
-                anoOverlay.style.display = 'none';
-            }
-        }
-
-        function mostrarDialogAno(mesAno) {
+        function mostrarDialogAno(mesAno, indices) {
             const dialogOverlay = document.getElementById('dialogOverlay');
             dialogOverlay.style.display = 'flex';
 
@@ -855,7 +851,7 @@
             const dialogCancel = document.getElementById('dialogCancel');
 
             dialogConfirm.onclick = () => {
-                deletarMesAno(mesAno);
+                deletarMesAno(mesAno, indices);
                 dialogOverlay.style.display = 'none';
                 mostrarGanhosAno(); // Atualiza o modal após deletar
             };
@@ -865,11 +861,13 @@
             };
         }
 
-        function deletarMesAno(mesAno) {
+        function deletarMesAno(mesAno, indices) {
             const [mes, ano] = mesAno.split('/');
-            ganhosMensais = ganhosMensais.filter(ganho => {
-                const [dia, gMes, gAno] = ganho.data.split('/');
-                return !(gMes === mes && gAno === ano);
+            indices.sort((a, b) => b - a); // Ordena em ordem decrescente para evitar problemas ao remover
+            indices.forEach(index => {
+                if (index >= 0 && index < ganhosMensais.length) {
+                    ganhosMensais.splice(index, 1);
+                }
             });
             salvarDados();
             atualizarListaMensal();
@@ -883,7 +881,7 @@
             dialogOverlay.style.display = 'flex';
 
             document.getElementById('dialogConfirm').onclick = () => {
-                deletarItem(index);
+                deletarItem(itemParaDeletar);
                 dialogOverlay.style.display = 'none';
             };
 
@@ -894,9 +892,11 @@
         }
 
         function deletarItem(index) {
-            ganhosMensais.splice(index, 1);
-            salvarDados();
-            atualizarListaMensal();
+            if (index >= 0 && index < ganhosMensais.length) {
+                ganhosMensais.splice(index, 1);
+                salvarDados();
+                atualizarListaMensal();
+            }
         }
 
         function salvarDados() {
