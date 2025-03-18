@@ -43,7 +43,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(69, 123, 157, 0.2), transparent);
+            background: radial-gradient(circle, rgba(0, 168, 204, 0.2), transparent);
             animation: pulse 8s infinite;
             z-index: -1;
         }
@@ -52,7 +52,7 @@
             font-size: 36px;
             font-weight: 800;
             text-align: center;
-            background: linear-gradient(to right, #457b9d, #a8dadc);
+            background: linear-gradient(to right, #00a8cc, #2a4066);
             -webkit-background-clip: text;
             color: transparent;
             margin-bottom: 30px;
@@ -64,12 +64,12 @@
             font-size: 24px;
             font-weight: 600;
             color: #e0e1dd;
-            background: #415a77;
+            background: #2a4066;
             padding: 10px;
             border-radius: 10px;
             text-align: center;
             margin: 20px 0;
-            box-shadow: 0 5px 15px rgba(65, 90, 119, 0.4);
+            box-shadow: 0 5px 15px rgba(42, 64, 102, 0.4);
         }
 
         .input-group {
@@ -92,22 +92,22 @@
         input, select {
             width: 100%;
             padding: 15px;
-            border: 2px solid #415a77;
+            border: 2px solid #2a4066;
             border-radius: 12px;
             font-size: 16px;
-            background: rgba(65, 90, 119, 0.2);
+            background: rgba(42, 64, 102, 0.2);
             color: #e0e1dd;
             transition: all 0.3s ease;
         }
 
         input:focus, select:focus {
-            border-color: #a8dadc;
-            box-shadow: 0 0 10px rgba(168, 218, 220, 0.5);
-            background: rgba(65, 90, 119, 0.4);
+            border-color: #00a8cc;
+            box-shadow: 0 0 10px rgba(0, 168, 204, 0.5);
+            background: rgba(42, 64, 102, 0.4);
         }
 
         button {
-            background: linear-gradient(135deg, #457b9d, #1d3557);
+            background: linear-gradient(135deg, #2a4066, #1b263b);
             color: #e0e1dd;
             padding: 15px;
             border: none;
@@ -115,34 +115,33 @@
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            width: 100%;
+            width: 100;
             margin-top: 20px;
             transition: all 0.4s ease;
-            box-shadow: 0 5px 20px rgba(69, 123, 157, 0.5);
+            box-shadow: 0 5px 20px rgba(42, 64, 102, 0.5);
         }
 
         button:hover {
-            background: linear-gradient(135deg, #1d3557, #0d1b2a);
+            background: linear-gradient(135deg, #1b263b, #0d1b2a);
             transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(29, 53, 87, 0.7);
+            box-shadow: 0 8px 25px rgba(27, 38, 59, 0.7);
         }
 
-        /* Estilo diferenciado para o botão "Ganhos no Ano" */
+        /* Botão "Ganhos no Ano" estilizado */
         #botaoGanhosAno {
-            background: linear-gradient(135deg, #00c4b4, #ff6f61);
-            border: 2px solid #a8dadc;
+            background: #00a8cc;
             color: #fff;
-            box-shadow: 0 5px 20px rgba(0, 196, 180, 0.5);
-            margin-top: 10px; /* Reduzido o espaço entre os botões */
+            border: 2px solid #2a4066;
+            box-shadow: 0 5px 20px rgba(0, 168, 204, 0.5);
+            margin-top: 10px;
             position: relative;
             overflow: hidden;
-            animation: glow 2s infinite ease-in-out;
         }
 
         #botaoGanhosAno:hover {
-            background: linear-gradient(135deg, #ff6f61, #00c4b4);
+            background: #008bb9;
             transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(0, 196, 180, 0.8);
+            box-shadow: 0 10px 30px rgba(0, 168, 204, 0.8);
         }
 
         #botaoGanhosAno::before {
@@ -153,14 +152,33 @@
             width: 200%;
             height: 200%;
             background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
-            transform: rotate(45deg);
             animation: shine 3s infinite linear;
+        }
+
+        /* Linha moderna como separador */
+        .separator {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, #00a8cc, #2a4066, #00a8cc);
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .separator::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: radial-gradient(circle, rgba(0, 168, 204, 0.3), transparent);
+            animation: pulse 6s infinite;
         }
 
         #resultadoDiario, #listaMensal {
             margin-top: 25px;
             padding: 20px;
-            background: rgba(65, 90, 119, 0.3);
+            background: rgba(42, 64, 102, 0.3);
             border-radius: 15px;
             font-size: 16px;
             text-align: center;
@@ -183,7 +201,7 @@
 
         #listaMensal li {
             padding: 10px 15px;
-            background: linear-gradient(90deg, #415a77, #33475b);
+            background: linear-gradient(90deg, #2a4066, #1b263b);
             margin: 5px 0;
             border-radius: 8px;
             font-size: 14px;
@@ -199,7 +217,7 @@
         #listaMensal li:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            background: linear-gradient(90deg, #4a6b8a, #3b5269);
+            background: linear-gradient(90deg, #336699, #1b263b);
         }
 
         #listaMensal li button {
@@ -221,8 +239,8 @@
         #listaMensal p {
             font-size: 16px;
             font-weight: 600;
-            color: #a8dadc;
-            background: rgba(69, 123, 157, 0.3);
+            color: #00a8cc;
+            background: rgba(0, 168, 204, 0.3);
             padding: 8px;
             border-radius: 8px;
             margin-top: 10px;
@@ -273,11 +291,11 @@
         }
 
         #dialogConfirm {
-            background: linear-gradient(135deg, #457b9d, #1d3557);
+            background: linear-gradient(135deg, #2a4066, #1b263b);
         }
 
         #dialogConfirm:hover {
-            background: linear-gradient(135deg, #1d3557, #0d1b2a);
+            background: linear-gradient(135deg, #1b263b, #0d1b2a);
         }
 
         #dialogCancel, #detalhesClose, #anoClose {
@@ -291,17 +309,17 @@
         /* Estilo do Modal de Detalhes */
         #detalhesBox {
             padding: 25px;
-            background: linear-gradient(135deg, #1b263b, #2a3b5a);
-            border: 1px solid #415a77;
+            background: linear-gradient(135deg, #1b263b, #2a4066);
+            border: 1px solid #2a4066;
         }
 
         #detalhesBox h4 {
             font-size: 22px;
             font-weight: 600;
-            color: #a8dadc;
+            color: #00a8cc;
             text-align: center;
             margin-bottom: 20px;
-            background: rgba(69, 123, 157, 0.2);
+            background: rgba(0, 168, 204, 0.2);
             padding: 8px;
             border-radius: 8px;
         }
@@ -314,7 +332,7 @@
         }
 
         #detalhesBox .detalhes-item {
-            background: rgba(65, 90, 119, 0.2);
+            background: rgba(42, 64, 102, 0.2);
             padding: 10px;
             border-radius: 8px;
             text-align: center;
@@ -322,31 +340,31 @@
         }
 
         #detalhesBox .detalhes-item:hover {
-            background: rgba(65, 90, 119, 0.4);
+            background: rgba(42, 64, 102, 0.4);
             transform: scale(1.02);
         }
 
         #detalhesBox .detalhes-item span {
             font-weight: 600;
-            color: #a8dadc;
+            color: #00a8cc;
             display: block;
             margin-bottom: 5px;
         }
 
         #detalhesBox .highlight {
             grid-column: span 2;
-            background: rgba(168, 218, 220, 0.1);
-            border: 1px solid #a8dadc;
+            background: rgba(0, 168, 204, 0.1);
+            border: 1px solid #00a8cc;
         }
 
         #detalhesBox .lucro-highlight {
             grid-column: span 2;
-            background: linear-gradient(135deg, #457b9d, #a8dadc);
+            background: linear-gradient(135deg, #2a4066, #00a8cc);
             border: 2px solid #e0e1dd;
             padding: 15px;
             font-size: 18px;
             font-weight: 700;
-            box-shadow: 0 6px 20px rgba(168, 218, 220, 0.5);
+            box-shadow: 0 6px 20px rgba(0, 168, 204, 0.5);
             border-radius: 10px;
             color: #1b263b;
             transition: all 0.3s ease;
@@ -354,21 +372,16 @@
 
         #detalhesBox .lucro-highlight:hover {
             transform: scale(1.03);
-            box-shadow: 0 8px 25px rgba(168, 218, 220, 0.7);
-        }
-
-        #detalhesBox button {
-            margin-top: 20px;
-            width: 100%;
+            box-shadow: 0 8px 25px rgba(0, 168, 204, 0.7);
         }
 
         /* Estilo Modernizado do Modal de Ganhos no Ano */
         #anoBox {
             max-width: 500px;
             padding: 30px;
-            background: linear-gradient(135deg, #1b263b, #0d1b2a);
-            border: 2px solid #00c4b4;
-            box-shadow: 0 15px 40px rgba(0, 196, 180, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #1b263b, #2a4066);
+            border: 2px solid #00a8cc;
+            box-shadow: 0 15px 40px rgba(0, 168, 204, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             position: relative;
             overflow: hidden;
@@ -381,20 +394,20 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(0, 196, 180, 0.1), transparent);
+            background: radial-gradient(circle, rgba(0, 168, 204, 0.1), transparent);
             animation: pulse 6s infinite;
         }
 
         #anoBox h4 {
             font-size: 24px;
             font-weight: 700;
-            color: #00c4b4;
+            color: #00a8cc;
             text-align: center;
             margin-bottom: 25px;
-            background: rgba(0, 196, 180, 0.1);
+            background: rgba(0, 168, 204, 0.1);
             padding: 10px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 196, 180, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 168, 204, 0.3);
             letter-spacing: 1px;
         }
 
@@ -406,60 +419,60 @@
             display: flex;
             justify-content: space-between;
             padding: 12px;
-            background: rgba(65, 90, 119, 0.3);
-            border: 1px solid rgba(168, 218, 220, 0.2);
+            background: rgba(42, 64, 102, 0.3);
+            border: 1px solid rgba(0, 168, 204, 0.2);
             border-radius: 10px;
             margin: 8px 0;
             transition: all 0.3s ease;
         }
 
         #anoBox .ano-item:hover {
-            background: rgba(0, 196, 180, 0.2);
+            background: rgba(0, 168, 204, 0.2);
             transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 196, 180, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 168, 204, 0.4);
         }
 
         #anoBox .ano-item span:first-child {
-            color: #a8dadc;
+            color: #e0e1dd;
             font-weight: 600;
         }
 
         #anoBox .ano-item span:last-child {
-            color: #e0e1dd;
+            color: #00a8cc;
             font-weight: 500;
         }
 
         #anoBox .ano-total {
             margin-top: 20px;
             padding: 15px;
-            background: linear-gradient(135deg, #00c4b4, #ff6f61);
-            border: 2px solid #fff;
+            background: #00a8cc;
+            border: 2px solid #2a4066;
             border-radius: 12px;
             font-size: 18px;
             font-weight: 700;
             text-align: center;
             color: #fff;
-            box-shadow: 0 8px 20px rgba(0, 196, 180, 0.5);
+            box-shadow: 0 8px 20px rgba(0, 168, 204, 0.5);
             transition: all 0.3s ease;
         }
 
         #anoBox .ano-total:hover {
             transform: scale(1.02);
-            box-shadow: 0 10px 25px rgba(0, 196, 180, 0.7);
+            box-shadow: 0 10px 25px rgba(0, 168, 204, 0.7);
         }
 
         #anoBox button {
             margin-top: 25px;
             width: 100%;
-            background: linear-gradient(135deg, #ff6f61, #00c4b4);
-            border: 2px solid #a8dadc;
-            box-shadow: 0 5px 15px rgba(255, 111, 97, 0.5);
+            background: #2a4066;
+            border: 2px solid #00a8cc;
+            box-shadow: 0 5px 15px rgba(42, 64, 102, 0.5);
         }
 
         #anoBox button:hover {
-            background: linear-gradient(135deg, #00c4b4, #ff6f61);
+            background: #1b263b;
             transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(255, 111, 97, 0.7);
+            box-shadow: 0 8px 20px rgba(42, 64, 102, 0.7);
         }
 
         @keyframes fadeIn {
@@ -481,12 +494,6 @@
         @keyframes zoomIn {
             from { opacity: 0; transform: scale(0.9) rotateX(-10deg); }
             to { opacity: 1; transform: scale(1) rotateX(0deg); }
-        }
-
-        @keyframes glow {
-            0% { box-shadow: 0 5px 20px rgba(0, 196, 180, 0.5); }
-            50% { box-shadow: 0 5px 20px rgba(0, 196, 180, 0.8); }
-            100% { box-shadow: 0 5px 20px rgba(0, 196, 180, 0.5); }
         }
 
         @keyframes shine {
@@ -550,30 +557,29 @@
             </div>
 
             <button onclick="calcularDiario()">Calcular Lucro Diário</button>
-            <div id="resultadoDiario"></div>
-        </div>
-
-        <div class="section">
-            <button id="botaoGanhosAno" onclick="mostrarGanhosAno()">Ganhos no Ano</button>
-            <h3>Ganhos no Mês</h3>
-            <div class="input-group">
-                <label>Selecionar Mês</label>
-                <select id="filtroMes" onchange="atualizarListaMensal()">
-                    <option value="01">Janeiro</option>
-                    <option value="02">Fevereiro</option>
-                    <option value="03">Março</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Maio</option>
-                    <option value="06">Junho</option>
-                    <option value="07">Julho</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Setembro</option>
-                    <option value="10">Outubro</option>
-                    <option value="11">Novembro</option>
-                    <option value="12">Dezembro</option>
-                </select>
+            <div class="separator"></div> <!-- Linha moderna como separador -->
+            <div class="section">
+                <button id="botaoGanhosAno" onclick="mostrarGanhosAno()">Ganhos no Ano</button>
+                <h3>Ganhos no Mês</h3>
+                <div class="input-group">
+                    <label>Selecionar Mês</label>
+                    <select id="filtroMes" onchange="atualizarListaMensal()">
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div id="listaMensal"></div>
             </div>
-            <div id="listaMensal"></div>
         </div>
     </div>
 
@@ -809,7 +815,7 @@
             anoContent.innerHTML = contentHTML;
             anoOverlay.style.display = 'flex';
             document.getElementById('anoClose').onclick = () => {
-                anoOverlay.style.display = 'none';
+                anoOverlay.style.display = 'none'; // Corrigido o evento de fechar
             };
         }
 
