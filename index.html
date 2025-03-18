@@ -148,17 +148,17 @@
         #listaMensal ul {
             list-style: none;
             padding: 0;
-            margin: 15px 0;
+            margin: 10px 0;
         }
 
         #listaMensal li {
-            padding: 15px;
+            padding: 10px 15px;
             background: linear-gradient(90deg, #415a77, #33475b);
-            margin: 10px 0;
-            border-radius: 10px;
-            font-size: 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-size: 14px;
             color: #e0e1dd;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             display: flex;
             justify-content: space-between;
@@ -167,17 +167,20 @@
         }
 
         #listaMensal li:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(90deg, #4a6b8a, #3b5269);
         }
 
         #listaMensal li button {
             background: #e63946;
-            padding: 8px 12px;
-            font-size: 14px;
+            padding: 6px 10px;
+            font-size: 12px;
             width: auto;
             margin: 0;
+            border-radius: 6px;
             box-shadow: none;
+            transition: all 0.3s ease;
         }
 
         #listaMensal li button:hover {
@@ -186,13 +189,13 @@
         }
 
         #listaMensal p {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #a8dadc;
             background: rgba(69, 123, 157, 0.3);
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         /* Estilo da Caixa de Diálogo Personalizada */
@@ -203,7 +206,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(13, 27, 42, 0.8);
+            background: rgba(13, 27, 42, 0.85);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -216,14 +219,14 @@
             width: 90%;
             max-width: 400px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            text-align: center;
             color: #e0e1dd;
             animation: zoomIn 0.3s ease-in-out;
         }
 
-        #dialogBox p, #detalhesBox p {
+        #dialogBox p {
             font-size: 16px;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         #dialogBox .dialog-buttons {
@@ -255,28 +258,61 @@
             background: #b32d38;
         }
 
-        /* Estilo específico do Modal de Detalhes */
+        /* Estilo do Modal de Detalhes */
         #detalhesBox {
-            max-width: 500px;
-            text-align: left;
-            padding: 30px;
+            max-width: 450px;
+            padding: 25px;
+            background: linear-gradient(135deg, #1b263b, #2a3b5a);
+            border: 1px solid #415a77;
         }
 
         #detalhesBox h4 {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 600;
             color: #a8dadc;
-            margin-bottom: 20px;
             text-align: center;
+            margin-bottom: 20px;
+            background: rgba(69, 123, 157, 0.2);
+            padding: 8px;
+            border-radius: 8px;
         }
 
-        #detalhesBox p {
-            margin: 10px 0;
-            font-size: 15px;
+        #detalhesBox .detalhes-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 14px;
         }
 
-        #detalhesBox strong {
+        #detalhesBox .detalhes-item {
+            background: rgba(65, 90, 119, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        #detalhesBox .detalhes-item:hover {
+            background: rgba(65, 90, 119, 0.4);
+            transform: scale(1.02);
+        }
+
+        #detalhesBox .detalhes-item span {
+            font-weight: 600;
             color: #a8dadc;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #detalhesBox .highlight {
+            grid-column: span 2;
+            background: rgba(168, 218, 220, 0.1);
+            border: 1px solid #a8dadc;
+        }
+
+        #detalhesBox button {
+            margin-top: 20px;
+            width: 100%;
         }
 
         @keyframes fadeIn {
@@ -296,8 +332,8 @@
         }
 
         @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.9) rotateX(-10deg); }
+            to { opacity: 1; transform: scale(1) rotateX(0deg); }
         }
 
         @media (max-width: 500px) {
@@ -311,7 +347,11 @@
                 font-size: 14px;
             }
             #listaMensal li {
-                font-size: 13px;
+                font-size: 12px;
+            }
+            #detalhesBox .detalhes-content {
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
         }
     </style>
@@ -373,7 +413,7 @@
     <div id="detalhesOverlay">
         <div id="detalhesBox">
             <h4>Detalhes do Dia</h4>
-            <div id="detalhesContent"></div>
+            <div class="detalhes-content" id="detalhesContent"></div>
             <button id="detalhesClose">Fechar</button>
         </div>
     </div>
@@ -382,12 +422,9 @@
         let ganhosMensais = JSON.parse(localStorage.getItem('ganhosMensais')) || [];
         atualizarListaMensal();
 
-        // Função para formatar horas e minutos enquanto o usuário digita
         function formatarHoras(input) {
             let valor = input.value.replace(/[^0-9]/g, '');
-            if (valor.length > 4) {
-                valor = valor.slice(0, 4);
-            }
+            if (valor.length > 4) valor = valor.slice(0, 4);
             if (valor.length === 0) {
                 input.value = '';
                 return;
@@ -499,15 +536,42 @@
             const detalhesContent = document.getElementById('detalhesContent');
 
             detalhesContent.innerHTML = `
-                <p>Data: ${ganho.data}</p>
-                <p>KM Total do Dia: ${ganho.kmTotalDia.toFixed(1)} km</p>
-                <p>Litros Consumidos: ${(ganho.kmTotalDia / ganho.consumo).toFixed(2)} L</p>
-                <p>Gasto com Combustível: R$ ${(ganho.kmTotalDia / ganho.consumo * ganho.precoCombustivel).toFixed(2)}</p>
-                <p>Ganho Total: R$ ${ganho.ganhoTotalDia.toFixed(2)}</p>
-                <p>Horas Trabalhadas: ${ganho.horasTrabalhadasInput}</p>
-                <p>Lucro Líquido: R$ ${ganho.lucro.toFixed(2)}</p>
-                <p>Ganho por Hora: R$ ${ganho.ganhoPorHora.toFixed(2)}</p>
-                <p><strong>Ganho por KM: R$ ${ganho.ganhoPorKm.toFixed(2)}</strong></p>
+                <div class="detalhes-item">
+                    <span>Data</span>
+                    ${ganho.data}
+                </div>
+                <div class="detalhes-item">
+                    <span>KM Total</span>
+                    ${ganho.kmTotalDia.toFixed(1)} km
+                </div>
+                <div class="detalhes-item">
+                    <span>Litros Consumidos</span>
+                    ${(ganho.kmTotalDia / ganho.consumo).toFixed(2)} L
+                </div>
+                <div class="detalhes-item">
+                    <span>Gasto Combustível</span>
+                    R$ ${(ganho.kmTotalDia / ganho.consumo * ganho.precoCombustivel).toFixed(2)}
+                </div>
+                <div class="detalhes-item">
+                    <span>Ganho Total</span>
+                    R$ ${ganho.ganhoTotalDia.toFixed(2)}
+                </div>
+                <div class="detalhes-item">
+                    <span>Horas Trabalhadas</span>
+                    ${ganho.horasTrabalhadasInput}
+                </div>
+                <div class="detalhes-item">
+                    <span>Lucro Líquido</span>
+                    R$ ${ganho.lucro.toFixed(2)}
+                </div>
+                <div class="detalhes-item">
+                    <span>Ganho por Hora</span>
+                    R$ ${ganho.ganhoPorHora.toFixed(2)}
+                </div>
+                <div class="detalhes-item highlight">
+                    <span>Ganho por KM</span>
+                    R$ ${ganho.ganhoPorKm.toFixed(2)}
+                </div>
             `;
 
             detalhesOverlay.style.display = 'flex';
