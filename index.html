@@ -115,7 +115,7 @@
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            width: 100;
+            width: 100%;
             margin-top: 20px;
             transition: all 0.4s ease;
             box-shadow: 0 5px 20px rgba(42, 64, 102, 0.5);
@@ -379,12 +379,13 @@
         #anoBox {
             max-width: 500px;
             padding: 30px;
-            background: linear-gradient(135deg, #1b263b, #2a4066);
-            border: 2px solid #00a8cc;
-            box-shadow: 0 15px 40px rgba(0, 168, 204, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            background: #1b263b;
+            border: 2px solid rgba(0, 168, 204, 0.5);
+            box-shadow: 0 15px 40px rgba(0, 168, 204, 0.3), inset 0 0 10px rgba(0, 168, 204, 0.1);
+            border-radius: 15px;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(135deg, #1b263b, #2a4066);
         }
 
         #anoBox::before {
@@ -557,7 +558,7 @@
             </div>
 
             <button onclick="calcularDiario()">Calcular Lucro Diário</button>
-            <div class="separator"></div> <!-- Linha moderna como separador -->
+            <div class="separator"></div>
             <div class="section">
                 <button id="botaoGanhosAno" onclick="mostrarGanhosAno()">Ganhos no Ano</button>
                 <h3>Ganhos no Mês</h3>
@@ -608,7 +609,7 @@
         <div id="anoBox">
             <h4>Ganhos no Ano</h4>
             <div class="ano-content" id="anoContent"></div>
-            <button id="anoClose">Fechar</button>
+            <button id="anoClose" onclick="fecharModalAno()">Fechar</button>
         </div>
     </div>
 
@@ -814,9 +815,11 @@
 
             anoContent.innerHTML = contentHTML;
             anoOverlay.style.display = 'flex';
-            document.getElementById('anoClose').onclick = () => {
-                anoOverlay.style.display = 'none'; // Corrigido o evento de fechar
-            };
+        }
+
+        function fecharModalAno() {
+            const anoOverlay = document.getElementById('anoOverlay');
+            anoOverlay.style.display = 'none';
         }
 
         let itemParaDeletar = null;
