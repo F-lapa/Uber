@@ -89,7 +89,7 @@
             transition: all 0.3s;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 15px;
             border: 2px solid #415a77;
@@ -100,7 +100,7 @@
             transition: all 0.3s ease;
         }
 
-        input:focus {
+        input:focus, select:focus {
             border-color: #a8dadc;
             box-shadow: 0 0 10px rgba(168, 218, 220, 0.5);
             background: rgba(65, 90, 119, 0.4);
@@ -217,7 +217,7 @@
             border-radius: 15px;
             padding: 20px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             color: #e0e1dd;
             animation: zoomIn 0.3s ease-in-out;
@@ -260,7 +260,6 @@
 
         /* Estilo do Modal de Detalhes */
         #detalhesBox {
-            max-width: 450px;
             padding: 25px;
             background: linear-gradient(135deg, #1b263b, #2a3b5a);
             border: 1px solid #415a77;
@@ -280,7 +279,7 @@
         #detalhesBox .detalhes-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 15px 20px;
             font-size: 14px;
         }
 
@@ -415,7 +414,7 @@
             h2 {
                 font-size: 28px;
             }
-            button, input {
+            button, input, select {
                 font-size: 14px;
             }
             #listaMensal li {
@@ -465,12 +464,30 @@
 
             <button onclick="calcularDiario()">Calcular Lucro Diário</button>
             <div id="resultadoDiario"></div>
+        </div>
 
-            <div class="section">
-                <h3>Ganhos no Mês</h3>
-                <button onclick="mostrarGanhosAno()">Ganhos no Ano</button>
-                <div id="listaMensal"></div>
+        <div class="section">
+            <button onclick="mostrarGanhosAno()">Ganhos no Ano</button>
+            <h3>Ganhos no Mês</h3>
+            <div class="input-group">
+                <label>Filtrar por Mês</label>
+                <select id="filtroMes" onchange="atualizarListaMensal()">
+                    <option value="">Todos os meses</option>
+                    <option value="01">Janeiro</option>
+                    <option value="02">Fevereiro</option>
+                    <option value="03">Março</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Maio</option>
+                    <option value="06">Junho</option>
+                    <option value="07">Julho</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
             </div>
+            <div id="listaMensal"></div>
         </div>
     </div>
 
@@ -578,6 +595,7 @@
                 ganhoPorKm
             });
             salvarDados();
+            atualizarListaMensal();
 
             const resultadoDiarioDiv = document.getElementById('resultadoDiario');
             resultadoDiarioDiv.style.display = 'block';
@@ -591,21 +609,24 @@
                 Ganho por Hora: R$ ${ganhoPorHora.toFixed(2)}<br>
                 <strong>Ganho por KM: R$ ${ganhoPorKm.toFixed(2)}</strong>
             `;
-
-            atualizarListaMensal();
         }
 
         function atualizarListaMensal() {
             const listaMensalDiv = document.getElementById('listaMensal');
+            const filtroMes = document.getElementById('filtroMes').value;
             listaMensalDiv.style.display = 'block';
 
             let totalMensal = 0;
             let listaHTML = '<ul>';
-            ganhosMensais.forEach((ganho, index) => {
+            const ganhosFiltrados = filtroMes 
+                ? ganhosMensais.filter(ganho => ganho.data.split('/')[1] === filtroMes)
+                : ganhosMensais;
+
+            ganhosFiltrados.forEach((ganho, index) => {
                 listaHTML += `
-                    <li onclick="mostrarDetalhes(${index})">
+                    <li onclick="mostrarDetalhes(${ganhosMensais.indexOf(ganho)})">
                         ${ganho.data}: R$ ${ganho.lucro.toFixed(2)}
-                        <button onclick="event.stopPropagation(); mostrarDialog(${index})">Deletar</button>
+                        <button onclick="event.stopPropagation(); mostrarDialog(${ganhosMensais.indexOf(ganho)})">Deletar</button>
                     </li>`;
                 totalMensal += ganho.lucro;
             });
@@ -630,20 +651,20 @@
                     ${ganho.kmTotalDia.toFixed(1)} km
                 </div>
                 <div class="detalhes-item">
-                    <span>Litros Consumidos</span>
-                    ${(ganho.kmTotalDia / ganho.consumo).toFixed(2)} L
-                </div>
-                <div class="detalhes-item">
-                    <span>Gasto Combustível</span>
-                    R$ ${(ganho.kmTotalDia / ganho.consumo * ganho.precoCombustivel).toFixed(2)}
-                </div>
-                <div class="detalhes-item">
                     <span>Ganho Total</span>
                     R$ ${ganho.ganhoTotalDia.toFixed(2)}
                 </div>
                 <div class="detalhes-item">
                     <span>Horas Trabalhadas</span>
                     ${ganho.horasTrabalhadasInput}
+                </div>
+                <div class="detalhes-item">
+                    <span>Litros Consumidos</span>
+                    ${(ganho.kmTotalDia / ganho.consumo).toFixed(2)} L
+                </div>
+                <div class="detalhes-item">
+                    <span>Gasto Combustível</span>
+                    R$ ${(ganho.kmTotalDia / ganho.consumo * ganho.precoCombustivel).toFixed(2)}
                 </div>
                 <div class="detalhes-item highlight">
                     <span>Ganho por KM</span>
