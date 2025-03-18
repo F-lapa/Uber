@@ -198,8 +198,8 @@
             margin-top: 10px;
         }
 
-        /* Estilo da Caixa de Diálogo Personalizada */
-        #dialogOverlay, #detalhesOverlay {
+        /* Estilo da Caixa de Diálogo e Modais */
+        #dialogOverlay, #detalhesOverlay, #anoOverlay {
             display: none;
             position: fixed;
             top: 0;
@@ -212,7 +212,7 @@
             z-index: 1000;
         }
 
-        #dialogBox, #detalhesBox {
+        #dialogBox, #detalhesBox, #anoBox {
             background: #1b263b;
             border-radius: 15px;
             padding: 20px;
@@ -235,7 +235,7 @@
             justify-content: center;
         }
 
-        #dialogBox button, #detalhesBox button {
+        #dialogBox button, #detalhesBox button, #anoBox button {
             width: 120px;
             padding: 10px;
             font-size: 14px;
@@ -250,11 +250,11 @@
             background: linear-gradient(135deg, #1d3557, #0d1b2a);
         }
 
-        #dialogCancel, #detalhesClose {
+        #dialogCancel, #detalhesClose, #anoClose {
             background: #e63946;
         }
 
-        #dialogCancel:hover, #detalhesClose:hover {
+        #dialogCancel:hover, #detalhesClose:hover, #anoClose:hover {
             background: #b32d38;
         }
 
@@ -315,6 +315,60 @@
             width: 100%;
         }
 
+        /* Estilo do Modal de Ganhos no Ano */
+        #anoBox {
+            max-width: 500px;
+            padding: 25px;
+            background: linear-gradient(135deg, #1b263b, #2a3b5a);
+            border: 1px solid #415a77;
+        }
+
+        #anoBox h4 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #a8dadc;
+            text-align: center;
+            margin-bottom: 20px;
+            background: rgba(69, 123, 157, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        #anoBox .ano-content {
+            font-size: 14px;
+        }
+
+        #anoBox .ano-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(65, 90, 119, 0.2);
+            border-radius: 8px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        #anoBox .ano-item:hover {
+            background: rgba(65, 90, 119, 0.4);
+            transform: scale(1.02);
+        }
+
+        #anoBox .ano-total {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(168, 218, 220, 0.1);
+            border: 1px solid #a8dadc;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        #anoBox button {
+            margin-top: 20px;
+            width: 100%;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -352,6 +406,9 @@
             #detalhesBox .detalhes-content {
                 grid-template-columns: 1fr;
                 gap: 10px;
+            }
+            #anoBox {
+                max-width: 90%;
             }
         }
     </style>
@@ -394,6 +451,7 @@
             <div class="section">
                 <h3>Ganhos no Mês</h3>
                 <div id="listaMensal"></div>
+                <button onclick="mostrarGanhosAno()">Ganhos no Ano</button>
             </div>
         </div>
     </div>
@@ -415,6 +473,15 @@
             <h4>Detalhes do Dia</h4>
             <div class="detalhes-content" id="detalhesContent"></div>
             <button id="detalhesClose">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Ganhos no Ano -->
+    <div id="anoOverlay">
+        <div id="anoBox">
+            <h4>Ganhos no Ano</h4>
+            <div class="ano-content" id="anoContent"></div>
+            <button id="anoClose">Fechar</button>
         </div>
     </div>
 
@@ -560,23 +627,62 @@
                     <span>Horas Trabalhadas</span>
                     ${ganho.horasTrabalhadasInput}
                 </div>
-                <div class="detalhes-item">
-                    <span>Lucro Líquido</span>
-                    R$ ${ganho.lucro.toFixed(2)}
+                <div class="detalhes-item highlight">
+                    <span>Ganho por KM</span>
+                    R$ ${ganho.ganhoPorKm.toFixed(2)}
                 </div>
                 <div class="detalhes-item">
                     <span>Ganho por Hora</span>
                     R$ ${ganho.ganhoPorHora.toFixed(2)}
                 </div>
-                <div class="detalhes-item highlight">
-                    <span>Ganho por KM</span>
-                    R$ ${ganho.ganhoPorKm.toFixed(2)}
+                <div class="detalhes-item">
+                    <span>Lucro Líquido</span>
+                    R$ ${ganho.lucro.toFixed(2)}
                 </div>
             `;
 
             detalhesOverlay.style.display = 'flex';
             document.getElementById('detalhesClose').onclick = () => {
                 detalhesOverlay.style.display = 'none';
+            };
+        }
+
+        function mostrarGanhosAno() {
+            const anoOverlay = document.getElementById('anoOverlay');
+            const anoContent = document.getElementById('anoContent');
+
+            // Agrupar ganhos por mês
+            const ganhosPorMes = {};
+            ganhosMensais.forEach(ganho => {
+                const [dia, mes, ano] = ganho.data.split('/');
+                const mesAno = `${mes}/${ano}`;
+                if (!ganhosPorMes[mesAno]) {
+                    ganhosPorMes[mesAno] = 0;
+                }
+                ganhosPorMes[mesAno] += ganho.lucro;
+            });
+
+            // Calcular total do ano
+            const totalAno = Object.values(ganhosPorMes).reduce((acc, val) => acc + val, 0);
+
+            // Gerar HTML
+            let contentHTML = '';
+            for (const [mesAno, total] of Object.entries(ganhosPorMes)) {
+                contentHTML += `
+                    <div class="ano-item">
+                        <span>${mesAno}</span>
+                        <span>R$ ${total.toFixed(2)}</span>
+                    </div>`;
+            }
+            contentHTML += `
+                <div class="ano-total">
+                    Total no Ano: R$ ${totalAno.toFixed(2)}
+                </div>`;
+
+            anoContent.innerHTML = contentHTML;
+            anoOverlay.style.display = 'flex';
+            document.getElementById('anoClose').onclick = () => {
+                anoOverlay.style.display = 'none';
             };
         }
 
