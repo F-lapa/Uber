@@ -127,6 +127,36 @@
             box-shadow: 0 8px 25px rgba(29, 53, 87, 0.7);
         }
 
+        /* Estilo diferenciado para o botão "Ganhos no Ano" */
+        #botaoGanhosAno {
+            background: linear-gradient(135deg, #00c4b4, #ff6f61);
+            border: 2px solid #a8dadc;
+            color: #fff;
+            box-shadow: 0 5px 20px rgba(0, 196, 180, 0.5);
+            margin-top: 10px; /* Reduzido o espaço entre os botões */
+            position: relative;
+            overflow: hidden;
+            animation: glow 2s infinite ease-in-out;
+        }
+
+        #botaoGanhosAno:hover {
+            background: linear-gradient(135deg, #ff6f61, #00c4b4);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 196, 180, 0.8);
+        }
+
+        #botaoGanhosAno::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite linear;
+        }
+
         #resultadoDiario, #listaMensal {
             margin-top: 25px;
             padding: 20px;
@@ -332,23 +362,40 @@
             width: 100%;
         }
 
-        /* Estilo do Modal de Ganhos no Ano */
+        /* Estilo Modernizado do Modal de Ganhos no Ano */
         #anoBox {
             max-width: 500px;
-            padding: 25px;
-            background: linear-gradient(135deg, #1b263b, #2a3b5a);
-            border: 1px solid #415a77;
+            padding: 30px;
+            background: linear-gradient(135deg, #1b263b, #0d1b2a);
+            border: 2px solid #00c4b4;
+            box-shadow: 0 15px 40px rgba(0, 196, 180, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #anoBox::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 196, 180, 0.1), transparent);
+            animation: pulse 6s infinite;
         }
 
         #anoBox h4 {
-            font-size: 22px;
-            font-weight: 600;
-            color: #a8dadc;
+            font-size: 24px;
+            font-weight: 700;
+            color: #00c4b4;
             text-align: center;
-            margin-bottom: 20px;
-            background: rgba(69, 123, 157, 0.2);
-            padding: 8px;
-            border-radius: 8px;
+            margin-bottom: 25px;
+            background: rgba(0, 196, 180, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 196, 180, 0.3);
+            letter-spacing: 1px;
         }
 
         #anoBox .ano-content {
@@ -358,32 +405,61 @@
         #anoBox .ano-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            background: rgba(65, 90, 119, 0.2);
-            border-radius: 8px;
-            margin: 5px 0;
+            padding: 12px;
+            background: rgba(65, 90, 119, 0.3);
+            border: 1px solid rgba(168, 218, 220, 0.2);
+            border-radius: 10px;
+            margin: 8px 0;
             transition: all 0.3s ease;
         }
 
         #anoBox .ano-item:hover {
-            background: rgba(65, 90, 119, 0.4);
-            transform: scale(1.02);
+            background: rgba(0, 196, 180, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 196, 180, 0.4);
+        }
+
+        #anoBox .ano-item span:first-child {
+            color: #a8dadc;
+            font-weight: 600;
+        }
+
+        #anoBox .ano-item span:last-child {
+            color: #e0e1dd;
+            font-weight: 500;
         }
 
         #anoBox .ano-total {
-            margin-top: 15px;
-            padding: 10px;
-            background: rgba(168, 218, 220, 0.1);
-            border: 1px solid #a8dadc;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #00c4b4, #ff6f61);
+            border: 2px solid #fff;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
             text-align: center;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(0, 196, 180, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        #anoBox .ano-total:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 196, 180, 0.7);
         }
 
         #anoBox button {
-            margin-top: 20px;
+            margin-top: 25px;
             width: 100%;
+            background: linear-gradient(135deg, #ff6f61, #00c4b4);
+            border: 2px solid #a8dadc;
+            box-shadow: 0 5px 15px rgba(255, 111, 97, 0.5);
+        }
+
+        #anoBox button:hover {
+            background: linear-gradient(135deg, #00c4b4, #ff6f61);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 111, 97, 0.7);
         }
 
         @keyframes fadeIn {
@@ -405,6 +481,17 @@
         @keyframes zoomIn {
             from { opacity: 0; transform: scale(0.9) rotateX(-10deg); }
             to { opacity: 1; transform: scale(1) rotateX(0deg); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 5px 20px rgba(0, 196, 180, 0.5); }
+            50% { box-shadow: 0 5px 20px rgba(0, 196, 180, 0.8); }
+            100% { box-shadow: 0 5px 20px rgba(0, 196, 180, 0.5); }
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
         }
 
         @media (max-width: 500px) {
@@ -467,7 +554,7 @@
         </div>
 
         <div class="section">
-            <button onclick="mostrarGanhosAno()">Ganhos no Ano</button>
+            <button id="botaoGanhosAno" onclick="mostrarGanhosAno()">Ganhos no Ano</button>
             <h3>Ganhos no Mês</h3>
             <div class="input-group">
                 <label>Selecionar Mês</label>
