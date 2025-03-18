@@ -419,6 +419,7 @@
         #anoBox .ano-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 12px;
             background: rgba(42, 64, 102, 0.3);
             border: 1px solid rgba(0, 168, 204, 0.2);
@@ -441,6 +442,22 @@
         #anoBox .ano-item span:last-child {
             color: #00a8cc;
             font-weight: 500;
+        }
+
+        #anoBox .ano-item button {
+            background: #e63946;
+            padding: 6px 10px;
+            font-size: 12px;
+            width: auto;
+            margin: 0;
+            border-radius: 6px;
+            box-shadow: none;
+            transition: all 0.3s ease;
+        }
+
+        #anoBox .ano-item button:hover {
+            background: #b32d38;
+            transform: scale(1.1);
         }
 
         #anoBox .ano-total {
@@ -609,7 +626,7 @@
         <div id="anoBox">
             <h4>Ganhos no Ano</h4>
             <div class="ano-content" id="anoContent"></div>
-            <button id="anoClose" onclick="fecharModalAno()">Fechar</button>
+            <button id="anoClose">Fechar</button>
         </div>
     </div>
 
@@ -621,6 +638,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('filtroMes').value = mesAtual.toString().padStart(2, '0');
             atualizarListaMensal();
+
+            // Associar o evento ao botão "Fechar" do modal de Ganhos no Ano
+            const anoCloseButton = document.getElementById('anoClose');
+            anoCloseButton.addEventListener('click', fecharModalAno);
         });
 
         function formatarHoras(input) {
@@ -793,19 +814,21 @@
                 const [dia, mes, ano] = ganho.data.split('/');
                 const mesAno = `${mes}/${ano}`;
                 if (!ganhosPorMes[mesAno]) {
-                    ganhosPorMes[mesAno] = 0;
+                    ganhosPorMes[mesAno] = { total: 0, indices: [] };
                 }
-                ganhosPorMes[mesAno] += ganho.lucro;
+                ganhosPorMes[mesAno].total += ganho.lucro;
+                ganhosPorMes[mesAno].indices.push(ganhosMensais.indexOf(ganho));
             });
 
-            const totalAno = Object.values(ganhosPorMes).reduce((acc, val) => acc + val, 0);
+            const totalAno = Object.values(ganhosPorMes).reduce((acc, val) => acc + val.total, 0);
 
             let contentHTML = '';
-            for (const [mesAno, total] of Object.entries(ganhosPorMes)) {
+            for (const [mesAno, data] of Object.entries(ganhosPorMes)) {
                 contentHTML += `
                     <div class="ano-item">
                         <span>${mesAno}</span>
-                        <span>R$ ${total.toFixed(2)}</span>
+                        <span>R$ ${data.total.toFixed(2)}</span>
+                        <button onclick="event.stopPropagation(); mostrarDialogAno('${mesAno}')">Deletar</button>
                     </div>`;
             }
             contentHTML += `
@@ -819,7 +842,37 @@
 
         function fecharModalAno() {
             const anoOverlay = document.getElementById('anoOverlay');
-            anoOverlay.style.display = 'none';
+            if (anoOverlay) {
+                anoOverlay.style.display = 'none';
+            }
+        }
+
+        function mostrarDialogAno(mesAno) {
+            const dialogOverlay = document.getElementById('dialogOverlay');
+            dialogOverlay.style.display = 'flex';
+
+            const dialogConfirm = document.getElementById('dialogConfirm');
+            const dialogCancel = document.getElementById('dialogCancel');
+
+            dialogConfirm.onclick = () => {
+                deletarMesAno(mesAno);
+                dialogOverlay.style.display = 'none';
+                mostrarGanhosAno(); // Atualiza o modal após deletar
+            };
+
+            dialogCancel.onclick = () => {
+                dialogOverlay.style.display = 'none';
+            };
+        }
+
+        function deletarMesAno(mesAno) {
+            const [mes, ano] = mesAno.split('/');
+            ganhosMensais = ganhosMensais.filter(ganho => {
+                const [dia, gMes, gAno] = ganho.data.split('/');
+                return !(gMes === mes && gAno === ano);
+            });
+            salvarDados();
+            atualizarListaMensal();
         }
 
         let itemParaDeletar = null;
