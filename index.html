@@ -192,7 +192,7 @@
 
         #resultadoDiario, #listaMensal {
             margin-top: 30px;
-            padding: 20px; /* Reduzido para compactar */
+            padding: 20px;
             background: rgba(42, 64, 102, 0.35);
             border-radius: 20px;
             font-size: 16px;
@@ -206,16 +206,16 @@
         #listaMensal ul {
             list-style: none;
             padding: 0;
-            margin: 10px 0; /* Reduzido para compactar */
+            margin: 10px 0;
         }
 
         #listaMensal li {
-            padding: 8px 12px; /* Reduzido para compactar */
+            padding: 8px 12px;
             background: linear-gradient(90deg, #2a4066, #1b263b);
-            margin: 5px 0; /* Reduzido para compactar */
-            border-radius: 10px; /* Ajustado para proporção */
-            font-size: 16px; /* Aumentado para destacar */
-            font-weight: 600; /* Negrito para destacar */
+            margin: 5px 0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
             color: #e0e1dd;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transition: all 0.4s ease;
@@ -231,13 +231,24 @@
             background: linear-gradient(90deg, #336699, #1b263b);
         }
 
+        #listaMensal li span {
+            flex-grow: 1;
+            text-align: left;
+            padding-right: 10px;
+        }
+
         #listaMensal li button {
             background: linear-gradient(135deg, #e63946, #b32d38);
-            padding: 2px 6px; /* Reduzido drasticamente */
-            font-size: 10px; /* Fonte ainda menor */
-            border-radius: 4px; /* Bordas menores */
+            padding: 6px 4px; /* Altura aumentada, largura drasticamente reduzida */
+            font-size: 10px;
+            border-radius: 4px;
             box-shadow: 0 1px 5px rgba(230, 57, 70, 0.3);
-            min-width: 30px; /* Largura mínima bem reduzida */
+            width: 20px; /* Largura fixa bem estreita */
+            min-width: 20px;
+            height: 24px; /* Altura aumentada */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #listaMensal li button:hover {
@@ -250,9 +261,9 @@
             font-weight: 700;
             color: #fff;
             background: linear-gradient(135deg, #00a8cc, #66d9ff);
-            padding: 12px; /* Ajustado para compactar */
+            padding: 12px;
             border-radius: 12px;
-            margin-top: 15px; /* Reduzido para compactar */
+            margin-top: 15px;
             box-shadow: 0 8px 25px rgba(0, 168, 204, 0.5);
             text-align: center;
             transition: all 0.3s ease;
@@ -706,7 +717,7 @@
                 const originalIndex = ganhosMensais.indexOf(ganho);
                 listaHTML += `
                     <li onclick="mostrarDetalhes(${originalIndex})">
-                        ${ganho.data}: R$ ${ganho.lucro.toFixed(2)}
+                        <span>${ganho.data}: R$ ${ganho.lucro.toFixed(2)}</span>
                         <button onclick="event.stopPropagation(); mostrarDialog(${originalIndex})">Deletar</button>
                     </li>`;
                 totalMensal += ganho.lucro;
