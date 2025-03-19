@@ -210,7 +210,7 @@
         }
 
         #listaMensal li {
-            padding: 12px 20px;
+            padding: 12px 15px;
             background: linear-gradient(90deg, #2a4066, #1b263b);
             margin: 8px 0;
             border-radius: 12px;
@@ -232,10 +232,11 @@
 
         #listaMensal li button {
             background: linear-gradient(135deg, #e63946, #b32d38);
-            padding: 8px 12px;
-            font-size: 13px;
+            padding: 6px 10px; /* Diminuído para dar mais espaço */
+            font-size: 12px; /* Tamanho da fonte reduzido */
             border-radius: 8px;
             box-shadow: 0 3px 10px rgba(230, 57, 70, 0.3);
+            min-width: 60px; /* Largura mínima para consistência */
         }
 
         #listaMensal li button:hover {
@@ -243,15 +244,22 @@
             transform: scale(1.1);
         }
 
-        #listaMensal p {
-            font-size: 18px;
-            font-weight: 600;
-            color: #00a8cc;
-            background: rgba(0, 168, 204, 0.25);
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 15px;
-            box-shadow: 0 5px 15px rgba(0, 168, 204, 0.2);
+        #listaMensal .total-mensal {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #00a8cc, #66d9ff);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: 0 8px 25px rgba(0, 168, 204, 0.5);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        #listaMensal .total-mensal:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(0, 168, 204, 0.7);
         }
 
         #dialogOverlay, #detalhesOverlay, #anoOverlay {
@@ -427,13 +435,6 @@
             font-weight: 600;
         }
 
-        #anoBox .ano-item button {
-            background: linear-gradient(135deg, #e63946, #b32d38);
-            padding: 8px 12px;
-            font-size: 13px;
-            border-radius: 8px;
-        }
-
         #anoBox .ano-total {
             margin-top: 25px;
             padding: 18px;
@@ -591,7 +592,6 @@
             document.getElementById('filtroMes').value = mesAtual.toString().padStart(2, '0');
             atualizarListaMensal();
 
-            // Event listeners para todos os botões de fechar
             document.getElementById('detalhesClose').addEventListener('click', fecharModal);
             document.getElementById('anoClose').addEventListener('click', fecharModal);
             document.getElementById('dialogCancel').addEventListener('click', fecharModal);
@@ -711,7 +711,7 @@
                 totalMensal += ganho.lucro;
             });
             listaHTML += '</ul>';
-            listaHTML += `<p>Total no Mês: R$ ${totalMensal.toFixed(2)}</p>`;
+            listaHTML += `<div class="total-mensal">Total no Mês: R$ ${totalMensal.toFixed(2)}</div>`;
 
             listaMensalDiv.innerHTML = listaHTML;
         }
@@ -772,10 +772,9 @@
                 const [dia, mes, ano] = ganho.data.split('/');
                 const mesAno = `${mes}/${ano}`;
                 if (!ganhosPorMes[mesAno]) {
-                    ganhosPorMes[mesAno] = { total: 0, indices: [] };
+                    ganhosPorMes[mesAno] = { total: 0 };
                 }
                 ganhosPorMes[mesAno].total += ganho.lucro;
-                ganhosPorMes[mesAno].indices.push(ganhosMensais.indexOf(ganho));
             });
 
             const totalAno = Object.values(ganhosPorMes).reduce((acc, val) => acc + val.total, 0);
@@ -786,7 +785,6 @@
                     <div class="ano-item">
                         <span>${mesAno}</span>
                         <span>R$ ${data.total.toFixed(2)}</span>
-                        <button onclick="mostrarDialogAno('${mesAno}', ${JSON.stringify(data.indices)})">Deletar</button>
                     </div>`;
             }
             contentHTML += `
@@ -796,29 +794,6 @@
 
             anoContent.innerHTML = contentHTML;
             anoOverlay.style.display = 'flex';
-        }
-
-        function mostrarDialogAno(mesAno, indices) {
-            const dialogOverlay = document.getElementById('dialogOverlay');
-            dialogOverlay.style.display = 'flex';
-
-            const dialogConfirm = document.getElementById('dialogConfirm');
-            dialogConfirm.onclick = () => {
-                deletarMesAno(mesAno, indices);
-                dialogOverlay.style.display = 'none';
-                mostrarGanhosAno();
-            };
-        }
-
-        function deletarMesAno(mesAno, indices) {
-            indices.sort((a, b) => b - a);
-            indices.forEach(index => {
-                if (index >= 0 && index < ganhosMensais.length) {
-                    ganhosMensais.splice(index, 1);
-                }
-            });
-            salvarDados();
-            atualizarListaMensal();
         }
 
         let itemParaDeletar = null;
