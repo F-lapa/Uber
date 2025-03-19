@@ -15,199 +15,209 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(45deg, #0d1b2a, #1b263b);
+            background: linear-gradient(135deg, #0d1b2a, #1b263b, #2a4066);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
             overflow-x: hidden;
+            background-attachment: fixed;
         }
 
         .container {
             background: rgba(27, 38, 59, 0.95);
-            border-radius: 20px;
+            border-radius: 25px;
             padding: 40px;
-            max-width: 800px;
+            max-width: 850px;
             width: 100%;
-            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 168, 204, 0.1);
             position: relative;
             overflow: hidden;
-            animation: fadeIn 1s ease-in-out;
+            animation: fadeIn 1.2s ease-in-out;
+            backdrop-filter: blur(10px);
         }
 
         .container::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 168, 204, 0.2), transparent);
-            animation: pulse 8s infinite;
+            top: -60%;
+            left: -60%;
+            width: 220%;
+            height: 220%;
+            background: radial-gradient(circle, rgba(0, 168, 204, 0.25), transparent);
+            animation: pulse 10s infinite ease-in-out;
             z-index: -1;
         }
 
         h2 {
-            font-size: 36px;
+            font-size: 40px;
             font-weight: 800;
             text-align: center;
-            background: linear-gradient(to right, #00a8cc, #2a4066);
+            background: linear-gradient(45deg, #00a8cc, #66d9ff);
             -webkit-background-clip: text;
             color: transparent;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 10px rgba(0, 168, 204, 0.3);
         }
 
         h3 {
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 26px;
+            font-weight: 700;
             color: #e0e1dd;
-            background: #2a4066;
-            padding: 10px;
-            border-radius: 10px;
+            background: linear-gradient(90deg, #2a4066, #1b263b);
+            padding: 12px 20px;
+            border-radius: 12px;
             text-align: center;
-            margin: 20px 0;
-            box-shadow: 0 5px 15px rgba(42, 64, 102, 0.4);
-        }
-
-        .input-group {
-            margin: 20px 0;
-            position: relative;
-        }
-
-        label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #e0e1dd;
-            position: absolute;
-            top: -10px;
-            left: 15px;
-            background: #1b263b;
-            padding: 0 5px;
-            transition: all 0.3s;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #2a4066;
-            border-radius: 12px;
-            font-size: 16px;
-            background: rgba(42, 64, 102, 0.2);
-            color: #e0e1dd;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus {
-            border-color: #00a8cc;
-            box-shadow: 0 0 10px rgba(0, 168, 204, 0.5);
-            background: rgba(42, 64, 102, 0.4);
-        }
-
-        button {
-            background: linear-gradient(135deg, #2a4066, #1b263b);
-            color: #e0e1dd;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: all 0.4s ease;
-            box-shadow: 0 5px 20px rgba(42, 64, 102, 0.5);
-        }
-
-        button:hover {
-            background: linear-gradient(135deg, #1b263b, #0d1b2a);
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(27, 38, 59, 0.7);
-        }
-
-        /* Botão "Ganhos no Ano" estilizado */
-        #botaoGanhosAno {
-            background: #00a8cc;
-            color: #fff;
-            border: 2px solid #2a4066;
-            box-shadow: 0 5px 20px rgba(0, 168, 204, 0.5);
-            margin-top: 10px;
+            margin: 25px 0;
+            box-shadow: 0 8px 25px rgba(42, 64, 102, 0.5);
             position: relative;
             overflow: hidden;
         }
 
-        #botaoGanhosAno:hover {
-            background: #008bb9;
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(0, 168, 204, 0.8);
+        h3::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shineTitle 4s infinite;
         }
 
-        #botaoGanhosAno::before {
+        .input-group {
+            margin: 25px 0;
+            position: relative;
+        }
+
+        label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e0e1dd;
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: linear-gradient(180deg, #1b263b, #2a4066);
+            padding: 2px 8px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            background: rgba(42, 64, 102, 0.25);
+            color: #e0e1dd;
+            transition: all 0.4s ease;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        input:focus, select:focus {
+            background: rgba(42, 64, 102, 0.45);
+            box-shadow: 0 0 15px rgba(0, 168, 204, 0.6), inset 0 2px 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        button {
+            background: linear-gradient(135deg, #00a8cc, #2a4066);
+            color: #fff;
+            padding: 16px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 25px;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(0, 168, 204, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #008bb9, #1b263b);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 168, 204, 0.6);
+        }
+
+        button::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent);
-            animation: shine 3s infinite linear;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent);
+            animation: shine 5s infinite linear;
         }
 
-        /* Linha moderna como separador */
+        #botaoGanhosAno {
+            background: linear-gradient(135deg, #00a8cc, #66d9ff);
+            box-shadow: 0 8px 25px rgba(0, 168, 204, 0.5);
+        }
+
+        #botaoGanhosAno:hover {
+            background: linear-gradient(135deg, #008bb9, #4db8ff);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 168, 204, 0.7);
+        }
+
         .separator {
             width: 100%;
-            height: 2px;
-            background: linear-gradient(to right, #00a8cc, #2a4066, #00a8cc);
-            margin: 10px 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00a8cc, transparent);
+            margin: 30px 0;
             position: relative;
+            border-radius: 5px;
         }
 
         .separator::before {
             content: '';
             position: absolute;
-            top: -2px;
+            top: -4px;
             left: 0;
             width: 100%;
-            height: 4px;
-            background: radial-gradient(circle, rgba(0, 168, 204, 0.3), transparent);
-            animation: pulse 6s infinite;
+            height: 8px;
+            background: radial-gradient(circle, rgba(0, 168, 204, 0.4), transparent);
+            animation: pulse 5s infinite;
         }
 
         #resultadoDiario, #listaMensal {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(42, 64, 102, 0.3);
-            border-radius: 15px;
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(42, 64, 102, 0.35);
+            border-radius: 20px;
             font-size: 16px;
             text-align: center;
             color: #e0e1dd;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.5s ease-in-out;
-        }
-
-        .section {
-            margin-top: 40px;
-            padding-top: 30px;
-            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.6s ease-in-out;
+            backdrop-filter: blur(5px);
         }
 
         #listaMensal ul {
             list-style: none;
             padding: 0;
-            margin: 10px 0;
+            margin: 15px 0;
         }
 
         #listaMensal li {
-            padding: 10px 15px;
+            padding: 12px 20px;
             background: linear-gradient(90deg, #2a4066, #1b263b);
-            margin: 5px 0;
-            border-radius: 8px;
-            font-size: 14px;
+            margin: 8px 0;
+            border-radius: 12px;
+            font-size: 15px;
             color: #e0e1dd;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -215,38 +225,35 @@
         }
 
         #listaMensal li:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
             background: linear-gradient(90deg, #336699, #1b263b);
         }
 
         #listaMensal li button {
-            background: #e63946;
-            padding: 6px 10px;
-            font-size: 12px;
-            width: auto;
-            margin: 0;
-            border-radius: 6px;
-            box-shadow: none;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #e63946, #b32d38);
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(230, 57, 70, 0.3);
         }
 
         #listaMensal li button:hover {
-            background: #b32d38;
+            background: linear-gradient(135deg, #b32d38, #8c232b);
             transform: scale(1.1);
         }
 
         #listaMensal p {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             color: #00a8cc;
-            background: rgba(0, 168, 204, 0.3);
-            padding: 8px;
-            border-radius: 8px;
-            margin-top: 10px;
+            background: rgba(0, 168, 204, 0.25);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0, 168, 204, 0.2);
         }
 
-        /* Estilo da Caixa de Diálogo e Modais */
         #dialogOverlay, #detalhesOverlay, #anoOverlay {
             display: none;
             position: fixed;
@@ -254,184 +261,160 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(13, 27, 42, 0.85);
+            background: rgba(13, 27, 42, 0.9);
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(3px);
         }
 
         #dialogBox, #detalhesBox, #anoBox {
-            background: #1b263b;
-            border-radius: 15px;
-            padding: 20px;
+            background: linear-gradient(135deg, #1b263b, #2a4066);
+            border-radius: 20px;
+            padding: 25px;
             width: 90%;
-            max-width: 450px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
             color: #e0e1dd;
-            animation: zoomIn 0.3s ease-in-out;
+            animation: zoomIn 0.4s ease-in-out;
+            position: relative;
+            border: 1px solid rgba(0, 168, 204, 0.3);
         }
 
         #dialogBox p {
-            font-size: 16px;
-            margin-bottom: 20px;
+            font-size: 18px;
+            margin-bottom: 25px;
             text-align: center;
         }
 
         #dialogBox .dialog-buttons {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             justify-content: center;
         }
 
         #dialogBox button, #detalhesBox button, #anoBox button {
-            width: 120px;
-            padding: 10px;
-            font-size: 14px;
+            width: 130px;
+            padding: 12px;
+            font-size: 15px;
             margin: 0;
+            border-radius: 10px;
         }
 
         #dialogConfirm {
-            background: linear-gradient(135deg, #2a4066, #1b263b);
+            background: linear-gradient(135deg, #00a8cc, #2a4066);
         }
 
         #dialogConfirm:hover {
-            background: linear-gradient(135deg, #1b263b, #0d1b2a);
+            background: linear-gradient(135deg, #008bb9, #1b263b);
         }
 
         #dialogCancel, #detalhesClose, #anoClose {
-            background: #e63946;
+            background: linear-gradient(135deg, #e63946, #b32d38);
         }
 
         #dialogCancel:hover, #detalhesClose:hover, #anoClose:hover {
-            background: #b32d38;
-        }
-
-        /* Estilo do Modal de Detalhes */
-        #detalhesBox {
-            padding: 25px;
-            background: linear-gradient(135deg, #1b263b, #2a4066);
-            border: 1px solid #2a4066;
+            background: linear-gradient(135deg, #b32d38, #8c232b);
         }
 
         #detalhesBox h4 {
-            font-size: 22px;
-            font-weight: 600;
-            color: #00a8cc;
-            text-align: center;
-            margin-bottom: 20px;
-            background: rgba(0, 168, 204, 0.2);
-            padding: 8px;
-            border-radius: 8px;
-        }
-
-        #detalhesBox .detalhes-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px 15px;
-            font-size: 14px;
-        }
-
-        #detalhesBox .detalhes-item {
-            background: rgba(42, 64, 102, 0.2);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        #detalhesBox .detalhes-item:hover {
-            background: rgba(42, 64, 102, 0.4);
-            transform: scale(1.02);
-        }
-
-        #detalhesBox .detalhes-item span {
-            font-weight: 600;
-            color: #00a8cc;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        #detalhesBox .highlight {
-            grid-column: span 2;
-            background: rgba(0, 168, 204, 0.1);
-            border: 1px solid #00a8cc;
-        }
-
-        #detalhesBox .lucro-highlight {
-            grid-column: span 2;
-            background: linear-gradient(135deg, #2a4066, #00a8cc);
-            border: 2px solid #e0e1dd;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: 700;
-            box-shadow: 0 6px 20px rgba(0, 168, 204, 0.5);
-            border-radius: 10px;
-            color: #1b263b;
-            transition: all 0.3s ease;
-        }
-
-        #detalhesBox .lucro-highlight:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 25px rgba(0, 168, 204, 0.7);
-        }
-
-        /* Estilo Modernizado do Modal de Ganhos no Ano */
-        #anoBox {
-            max-width: 500px;
-            padding: 30px;
-            background: #1b263b;
-            border: 2px solid rgba(0, 168, 204, 0.5);
-            box-shadow: 0 15px 40px rgba(0, 168, 204, 0.3), inset 0 0 10px rgba(0, 168, 204, 0.1);
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, #1b263b, #2a4066);
-        }
-
-        #anoBox::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 168, 204, 0.1), transparent);
-            animation: pulse 6s infinite;
-        }
-
-        #anoBox h4 {
             font-size: 24px;
             font-weight: 700;
             color: #00a8cc;
             text-align: center;
             margin-bottom: 25px;
-            background: rgba(0, 168, 204, 0.1);
+            background: rgba(0, 168, 204, 0.15);
             padding: 10px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 168, 204, 0.3);
-            letter-spacing: 1px;
         }
 
-        #anoBox .ano-content {
-            font-size: 14px;
+        #detalhesBox .detalhes-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 15px;
+        }
+
+        #detalhesBox .detalhes-item {
+            background: rgba(42, 64, 102, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        #detalhesBox .detalhes-item:hover {
+            background: rgba(42, 64, 102, 0.5);
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #detalhesBox .detalhes-item span {
+            font-weight: 600;
+            color: #66d9ff;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        #detalhesBox .lucro-highlight {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #00a8cc, #2a4066);
+            border: 2px solid #66d9ff;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(0, 168, 204, 0.6);
+            color: #fff;
+        }
+
+        #anoBox {
+            max-width: 550px;
+            padding: 35px;
+            background: linear-gradient(135deg, #1b263b, #2a4066);
+            border: 2px solid rgba(0, 168, 204, 0.6);
+            box-shadow: 0 20px 50px rgba(0, 168, 204, 0.4), inset 0 0 15px rgba(0, 168, 204, 0.15);
+        }
+
+        #anoBox::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -60%;
+            width: 220%;
+            height: 220%;
+            background: radial-gradient(circle, rgba(0, 168, 204, 0.15), transparent);
+            animation: pulse 8s infinite;
+        }
+
+        #anoBox h4 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #66d9ff;
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(0, 168, 204, 0.15);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 168, 204, 0.4);
         }
 
         #anoBox .ano-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            background: rgba(42, 64, 102, 0.3);
-            border: 1px solid rgba(0, 168, 204, 0.2);
-            border-radius: 10px;
-            margin: 8px 0;
-            transition: all 0.3s ease;
+            padding: 15px;
+            background: rgba(42, 64, 102, 0.35);
+            border: 1px solid rgba(0, 168, 204, 0.3);
+            border-radius: 12px;
+            margin: 10px 0;
+            transition: all 0.4s ease;
         }
 
         #anoBox .ano-item:hover {
-            background: rgba(0, 168, 204, 0.2);
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 168, 204, 0.4);
+            background: rgba(0, 168, 204, 0.25);
+            transform: translateX(8px);
+            box-shadow: 0 8px 20px rgba(0, 168, 204, 0.5);
         }
 
         #anoBox .ano-item span:first-child {
@@ -440,77 +423,48 @@
         }
 
         #anoBox .ano-item span:last-child {
-            color: #00a8cc;
-            font-weight: 500;
+            color: #66d9ff;
+            font-weight: 600;
         }
 
         #anoBox .ano-item button {
-            background: #e63946;
-            padding: 6px 10px;
-            font-size: 12px;
-            width: auto;
-            margin: 0;
-            border-radius: 6px;
-            box-shadow: none;
-            transition: all 0.3s ease;
-        }
-
-        #anoBox .ano-item button:hover {
-            background: #b32d38;
-            transform: scale(1.1);
+            background: linear-gradient(135deg, #e63946, #b32d38);
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
         }
 
         #anoBox .ano-total {
-            margin-top: 20px;
-            padding: 15px;
-            background: #00a8cc;
-            border: 2px solid #2a4066;
-            border-radius: 12px;
-            font-size: 18px;
+            margin-top: 25px;
+            padding: 18px;
+            background: linear-gradient(135deg, #00a8cc, #66d9ff);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            font-size: 20px;
             font-weight: 700;
             text-align: center;
             color: #fff;
-            box-shadow: 0 8px 20px rgba(0, 168, 204, 0.5);
-            transition: all 0.3s ease;
-        }
-
-        #anoBox .ano-total:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 25px rgba(0, 168, 204, 0.7);
-        }
-
-        #anoBox button {
-            margin-top: 25px;
-            width: 100%;
-            background: #2a4066;
-            border: 2px solid #00a8cc;
-            box-shadow: 0 5px 15px rgba(42, 64, 102, 0.5);
-        }
-
-        #anoBox button:hover {
-            background: #1b263b;
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(42, 64, 102, 0.7);
+            box-shadow: 0 10px 30px rgba(0, 168, 204, 0.6);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(0.95); }
         }
 
         @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.9) rotateX(-10deg); }
+            from { opacity: 0; transform: scale(0.85) rotateX(-15deg); }
             to { opacity: 1; transform: scale(1) rotateX(0deg); }
         }
 
@@ -519,25 +473,27 @@
             100% { transform: translateX(100%) rotate(45deg); }
         }
 
+        @keyframes shineTitle {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+
         @media (max-width: 500px) {
             .container {
-                padding: 20px;
+                padding: 25px;
             }
             h2 {
-                font-size: 28px;
+                font-size: 32px;
+            }
+            h3 {
+                font-size: 22px;
             }
             button, input, select {
-                font-size: 14px;
-            }
-            #listaMensal li {
-                font-size: 12px;
+                font-size: 15px;
             }
             #detalhesBox .detalhes-content {
                 grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            #anoBox {
-                max-width: 90%;
             }
         }
     </style>
@@ -601,7 +557,6 @@
         </div>
     </div>
 
-    <!-- Caixa de Diálogo Personalizada para Deletar -->
     <div id="dialogOverlay">
         <div id="dialogBox">
             <p>Tem certeza que deseja deletar este item?</p>
@@ -612,43 +567,41 @@
         </div>
     </div>
 
-    <!-- Modal de Detalhes -->
     <div id="detalhesOverlay">
         <div id="detalhesBox">
             <h4>Detalhes do Dia</h4>
             <div class="detalhes-content" id="detalhesContent"></div>
-            <button id="detalhesClose" class="modal-close">Fechar</button>
+            <button id="detalhesClose">Fechar</button>
         </div>
     </div>
 
-    <!-- Modal de Ganhos no Ano -->
     <div id="anoOverlay">
         <div id="anoBox">
             <h4>Ganhos no Ano</h4>
             <div class="ano-content" id="anoContent"></div>
-            <button id="anoClose" class="modal-close">Fechar</button>
+            <button id="anoClose">Fechar</button>
         </div>
     </div>
 
     <script>
         let ganhosMensais = JSON.parse(localStorage.getItem('ganhosMensais')) || [];
 
-        // Pré-selecionar o mês atual
-        const mesAtual = new Date().getMonth() + 1; // Janeiro = 0, ajusta para 1-12
+        const mesAtual = new Date().getMonth() + 1;
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('filtroMes').value = mesAtual.toString().padStart(2, '0');
             atualizarListaMensal();
 
-            // Gerenciar o fechamento de todos os modais com uma única função
-            document.querySelectorAll('.modal-close').forEach(button => {
-                button.addEventListener('click', () => {
-                    const overlays = document.querySelectorAll('#dialogOverlay, #detalhesOverlay, #anoOverlay');
-                    overlays.forEach(overlay => {
-                        overlay.style.display = 'none';
-                    });
-                });
-            });
+            // Event listeners para todos os botões de fechar
+            document.getElementById('detalhesClose').addEventListener('click', fecharModal);
+            document.getElementById('anoClose').addEventListener('click', fecharModal);
+            document.getElementById('dialogCancel').addEventListener('click', fecharModal);
         });
+
+        function fecharModal() {
+            document.getElementById('detalhesOverlay').style.display = 'none';
+            document.getElementById('anoOverlay').style.display = 'none';
+            document.getElementById('dialogOverlay').style.display = 'none';
+        }
 
         function formatarHoras(input) {
             let valor = input.value.replace(/[^0-9]/g, '');
@@ -698,7 +651,7 @@
             }
 
             if (kmTotalDia <= 0 || consumo <= 0 || precoCombustivel <= 0 || ganhoTotalDia <= 0 || horasTrabalhadas <= 0) {
-                alert('Por favor, insira todos os valores válidos maiores que zero para o cálculo diário.');
+                alert('Por favor, insira todos os valores válidos maiores que zero.');
                 return;
             }
 
@@ -723,7 +676,8 @@
             salvarDados();
             atualizarListaMensal();
 
-            const resultadoDiarioDiv = document.getElementById('resultadoDiario');
+            const resultadoDiarioDiv = document.getElementById('resultadoDiario') || document.createElement('div');
+            resultadoDiarioDiv.id = 'resultadoDiario';
             resultadoDiarioDiv.style.display = 'block';
             resultadoDiarioDiv.innerHTML = `
                 KM Total do Dia: ${kmTotalDia.toFixed(1)} km<br>
@@ -735,6 +689,7 @@
                 Ganho por Hora: R$ ${ganhoPorHora.toFixed(2)}<br>
                 <strong>Ganho por KM: R$ ${ganhoPorKm.toFixed(2)}</strong>
             `;
+            document.querySelector('.section:first-child').appendChild(resultadoDiarioDiv);
         }
 
         function atualizarListaMensal() {
@@ -848,22 +803,15 @@
             dialogOverlay.style.display = 'flex';
 
             const dialogConfirm = document.getElementById('dialogConfirm');
-            const dialogCancel = document.getElementById('dialogCancel');
-
             dialogConfirm.onclick = () => {
                 deletarMesAno(mesAno, indices);
                 dialogOverlay.style.display = 'none';
-                mostrarGanhosAno(); // Atualiza o modal após deletar
-            };
-
-            dialogCancel.onclick = () => {
-                dialogOverlay.style.display = 'none';
+                mostrarGanhosAno();
             };
         }
 
         function deletarMesAno(mesAno, indices) {
-            const [mes, ano] = mesAno.split('/');
-            indices.sort((a, b) => b - a); // Ordena em ordem decrescente para evitar problemas ao remover
+            indices.sort((a, b) => b - a);
             indices.forEach(index => {
                 if (index >= 0 && index < ganhosMensais.length) {
                     ganhosMensais.splice(index, 1);
@@ -883,11 +831,6 @@
             document.getElementById('dialogConfirm').onclick = () => {
                 deletarItem(itemParaDeletar);
                 dialogOverlay.style.display = 'none';
-            };
-
-            document.getElementById('dialogCancel').onclick = () => {
-                dialogOverlay.style.display = 'none';
-                itemParaDeletar = null;
             };
         }
 
