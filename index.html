@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -90,7 +91,49 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Debug Panel - Agora sempre visível e mais detalhado */
+        /* Sync Code Display */
+        .sync-code-display {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
+            border: 2px dashed var(--primary);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .sync-code-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .sync-code-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-light);
+            letter-spacing: 0.2em;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: all;
+        }
+
+        .sync-code-value:hover {
+            background: rgba(99, 102, 241, 0.3);
+            transform: scale(1.05);
+        }
+
+        .sync-code-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Debug Panel */
         .debug-panel {
             position: fixed;
             bottom: 20px;
@@ -102,7 +145,7 @@
             font-size: 0.8rem;
             color: var(--text-secondary);
             width: 350px;
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
             z-index: 9998;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -186,10 +229,12 @@
             display: flex;
             gap: 8px;
             margin-top: 12px;
+            flex-wrap: wrap;
         }
 
         .debug-btn {
             flex: 1;
+            min-width: 80px;
             padding: 8px 12px;
             border: 1px solid var(--border);
             background: rgba(255, 255, 255, 0.05);
@@ -213,7 +258,7 @@
             margin-top: 12px;
             font-family: 'Courier New', monospace;
             font-size: 0.7rem;
-            max-height: 100px;
+            max-height: 120px;
             overflow-y: auto;
         }
 
@@ -350,6 +395,13 @@
             font-size: 0.75rem;
             color: var(--success);
             margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sync-status:hover {
+            background: rgba(16, 185, 129, 0.2);
+            transform: scale(1.05);
         }
 
         .sync-status.error {
@@ -1275,6 +1327,10 @@
                 border-radius: 20px 20px 0 0;
                 max-height: 60vh;
             }
+            
+            .sync-code-value {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -1296,6 +1352,18 @@
         </div>
         
         <div class="debug-section">
+            <div class="debug-section-title">Código de Sincronização</div>
+            <div class="sync-code-display" style="margin: 0; padding: 15px;">
+                <div class="sync-code-value" id="debugSyncCodeDisplay" onclick="copiarSyncCode()" style="font-size: 1.5rem; cursor: pointer;">----</div>
+                <div class="sync-code-hint">Clique para copiar</div>
+            </div>
+            <div class="debug-actions" style="margin-top: 10px;">
+                <button class="debug-btn" onclick="mostrarModalTrocarCodigo()" style="flex: 1;">🔄 Trocar Código</button>
+                <button class="debug-btn" onclick="copiarSyncCode()" style="flex: 1;">📋 Copiar</button>
+            </div>
+        </div>
+        
+        <div class="debug-section">
             <div class="debug-section-title">Status do Sistema</div>
             <div class="debug-item">
                 <span class="debug-label">Firebase RTDB</span>
@@ -1304,10 +1372,6 @@
             <div class="debug-item">
                 <span class="debug-label">Conexão</span>
                 <span class="debug-value" id="debugConnection">Verificando...</span>
-            </div>
-            <div class="debug-item">
-                <span class="debug-label">Device ID</span>
-                <span class="debug-value" id="debugDeviceId">-</span>
             </div>
             <div class="debug-item">
                 <span class="debug-label">Sincronização</span>
@@ -1360,7 +1424,15 @@
                 <h1>DriverPro</h1>
             </div>
             <p>Calculadora inteligente de ganhos para motoristas</p>
-            <div class="sync-status" id="syncStatus">
+            
+            <!-- Código de Sincronização no Header -->
+            <div class="sync-code-display" style="max-width: 400px; margin: 20px auto;">
+                <div class="sync-code-label">🔄 Código de Sincronização</div>
+                <div class="sync-code-value" id="syncCodeDisplay" onclick="copiarSyncCode()">GERANDO...</div>
+                <div class="sync-code-hint">Use este código em outros dispositivos para sincronizar • Clique para copiar</div>
+            </div>
+            
+            <div class="sync-status" id="syncStatus" onclick="mostrarModalTrocarCodigo()">
                 <span class="sync-dot"></span>
                 <span id="syncText">Inicializando...</span>
             </div>
@@ -1599,6 +1671,41 @@
         </div>
     </div>
 
+    <!-- Modal para Trocar Código de Sincronização -->
+    <div class="modal-overlay" id="modalSyncCode">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 class="modal-title">🔄 Código de Sincronização</h3>
+                <button class="modal-close" onclick="fecharModal('modalSyncCode')">×</button>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    Insira o mesmo código em todos os dispositivos que deseja sincronizar.
+                </p>
+                
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label for="novoSyncCode">Novo Código (4 dígitos)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔑</span>
+                        <input type="text" id="novoSyncCode" maxlength="4" placeholder="1234" 
+                               style="padding-left: 48px; font-size: 1.5rem; letter-spacing: 0.5em; text-align: center; font-weight: bold;">
+                    </div>
+                </div>
+                
+                <div style="background: rgba(99, 102, 241, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 8px;">Código Atual:</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--primary-light); letter-spacing: 0.2em; text-align: center;" id="codigoAtualModal">----</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-secondary" onclick="fecharModal('modalSyncCode')" style="flex: 1;">Cancelar</button>
+                <button class="btn btn-primary" onclick="trocarSyncCode()" style="flex: 1; margin-top: 0;">🔄 Aplicar Código</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==========================================
         // CONFIGURAÇÃO FIREBASE REALTIME DATABASE
@@ -1607,7 +1714,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyAQsBV25b7ZHR12NjuLDdxGH1EisVetstQ",
             authDomain: "uber-2bf50.firebaseapp.com",
-            databaseURL: "https://uber-2bf50-default-rtdb.firebaseio.com", // IMPORTANTE: URL do Realtime Database
+            databaseURL: "https://uber-2bf50-default-rtdb.firebaseio.com",
             projectId: "uber-2bf50",
             storageBucket: "uber-2bf50.firebasestorage.app",
             messagingSenderId: "714296805246",
@@ -1624,11 +1731,9 @@
         try {
             app = firebase.initializeApp(firebaseConfig);
             database = firebase.database();
-            console.log('✅ Firebase Realtime Database inicializado com sucesso');
-            addDebugLog('Firebase inicializado');
+            console.log('✅ Firebase Realtime Database inicializado');
         } catch (error) {
             console.error('❌ Erro ao inicializar Firebase:', error);
-            addDebugLog('Erro Firebase: ' + error.message, 'error');
         }
 
         // ==========================================
@@ -1639,9 +1744,94 @@
         let registroEditando = null;
         let registroExcluir = null;
         let META_MENSAL = 5000;
-        let DEVICE_ID = null;
+        let SYNC_CODE = null;
         let firebaseOnline = false;
         let cloudRegistrosCount = 0;
+        let syncListeners = [];
+
+        // ==========================================
+        // SISTEMA DE CÓDIGO DE SINCRONIZAÇÃO
+        // ==========================================
+
+        function gerarSyncCode() {
+            // Gera código de 4 dígitos numéricos
+            return Math.floor(1000 + Math.random() * 9000).toString();
+        }
+
+        function validarSyncCode(code) {
+            return /^\d{4}$/.test(code);
+        }
+
+        function getSyncCode() {
+            // Tenta pegar código existente ou gera um novo
+            let code = localStorage.getItem('driverPro_syncCode');
+            if (!code || !validarSyncCode(code)) {
+                code = gerarSyncCode();
+                localStorage.setItem('driverPro_syncCode', code);
+            }
+            return code;
+        }
+
+        function setSyncCode(novoCodigo) {
+            if (!validarSyncCode(novoCodigo)) {
+                showToast('Código deve ter 4 dígitos numéricos', 'error');
+                return false;
+            }
+            
+            // Remove listeners antigos
+            removerListeners();
+            
+            SYNC_CODE = novoCodigo;
+            localStorage.setItem('driverPro_syncCode', SYNC_CODE);
+            
+            // Atualiza displays
+            atualizarSyncCodeDisplay();
+            
+            // Reinicia conexão com novo código
+            setupRealtimeListeners();
+            
+            showToast('Código atualizado! Sincronizando...', 'success');
+            addDebugLog('Código alterado para: ' + SYNC_CODE);
+            
+            return true;
+        }
+
+        function atualizarSyncCodeDisplay() {
+            const displays = document.querySelectorAll('#syncCodeDisplay, #debugSyncCodeDisplay, #codigoAtualModal');
+            displays.forEach(el => {
+                if (el) el.textContent = SYNC_CODE || '----';
+            });
+        }
+
+        function copiarSyncCode() {
+            if (!SYNC_CODE) return;
+            
+            navigator.clipboard.writeText(SYNC_CODE).then(() => {
+                showToast('Código copiado: ' + SYNC_CODE, 'success');
+            }).catch(() => {
+                // Fallback para dispositivos móveis
+                const input = document.createElement('input');
+                input.value = SYNC_CODE;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                showToast('Código copiado: ' + SYNC_CODE, 'success');
+            });
+        }
+
+        function mostrarModalTrocarCodigo() {
+            document.getElementById('novoSyncCode').value = '';
+            document.getElementById('codigoAtualModal').textContent = SYNC_CODE || '----';
+            document.getElementById('modalSyncCode').classList.add('show');
+        }
+
+        function trocarSyncCode() {
+            const novoCodigo = document.getElementById('novoSyncCode').value.trim();
+            if (setSyncCode(novoCodigo)) {
+                fecharModal('modalSyncCode');
+            }
+        }
 
         // ==========================================
         // INICIALIZAÇÃO
@@ -1653,23 +1843,16 @@
 
         async function inicializarSistema() {
             try {
-                // 1. Gerar/obter Device ID
-                DEVICE_ID = localStorage.getItem('driverPro_deviceId');
-                if (!DEVICE_ID) {
-                    DEVICE_ID = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                    localStorage.setItem('driverPro_deviceId', DEVICE_ID);
-                    addDebugLog('Novo Device ID criado: ' + DEVICE_ID);
-                } else {
-                    addDebugLog('Device ID existente: ' + DEVICE_ID);
-                }
-                updateDebugUI('deviceId', DEVICE_ID);
+                // 1. Obter código de sincronização
+                SYNC_CODE = getSyncCode();
+                atualizarSyncCodeDisplay();
+                addDebugLog('Código de sincronização: ' + SYNC_CODE);
 
-                // 2. Carregar dados locais primeiro (sempre funciona)
+                // 2. Carregar dados locais primeiro
                 carregarDadosLocais();
                 addDebugLog('Dados locais carregados: ' + registros.length + ' registros');
-                updateDebugUI('localCount', registros.length);
 
-                // 3. Tentar conectar ao Firebase Realtime Database
+                // 3. Tentar conectar ao Firebase
                 if (database) {
                     try {
                         await testarRealtimeDatabase();
@@ -1677,20 +1860,15 @@
                         setupRealtimeListeners();
                         atualizarSyncStatus('online');
                         addDebugLog('Conectado ao Realtime Database', 'success');
-                        updateDebugUI('firebaseStatus', 'Conectado', 'success');
-                        updateDebugUI('connection', 'Online', 'success');
                     } catch (error) {
                         console.warn('⚠️ Firebase indisponível:', error.message);
                         atualizarSyncStatus('offline');
                         addDebugLog('Firebase offline: ' + error.message, 'warning');
-                        updateDebugUI('firebaseStatus', 'Erro', 'error');
-                        updateDebugUI('connection', 'Offline', 'warning');
                         updateDebugUI('error', error.message);
                     }
                 } else {
                     atualizarSyncStatus('offline');
                     addDebugLog('Firebase não inicializado', 'warning');
-                    updateDebugUI('firebaseStatus', 'Não inicializado', 'error');
                 }
 
                 // 4. Inicializar UI
@@ -1704,9 +1882,6 @@
             } catch (error) {
                 console.error('❌ Erro na inicialização:', error);
                 addDebugLog('Erro crítico: ' + error.message, 'error');
-                updateDebugUI('error', error.message);
-                
-                // Mesmo com erro, mostrar app com dados locais
                 carregarDadosLocais();
                 inicializarApp();
                 document.getElementById('loadingScreen').classList.add('hidden');
@@ -1719,13 +1894,12 @@
         // ==========================================
 
         async function testarRealtimeDatabase() {
-            // Testar conexão tentando escrever um valor de teste
             const testRef = database.ref('.info/connected');
             const snapshot = await testRef.once('value');
             
-            // Verificar se conseguimos acessar o nó do dispositivo
-            const deviceRef = database.ref('devices/' + DEVICE_ID);
-            await deviceRef.child('lastAccess').set({
+            // Testa acesso ao nó do código
+            const codeRef = database.ref('syncCodes/' + SYNC_CODE);
+            await codeRef.child('lastAccess').set({
                 timestamp: Date.now(),
                 userAgent: navigator.userAgent.substring(0, 50)
             });
@@ -1733,20 +1907,36 @@
             return true;
         }
 
+        function removerListeners() {
+            // Remove todos os listeners existentes
+            syncListeners.forEach(unsubscribe => {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                } else if (unsubscribe && typeof unsubscribe.off === 'function') {
+                    unsubscribe.off();
+                }
+            });
+            syncListeners = [];
+            addDebugLog('Listeners removidos');
+        }
+
         function setupRealtimeListeners() {
-            if (!database || !DEVICE_ID) return;
+            if (!database || !SYNC_CODE) {
+                addDebugLog('Não foi possível setup listeners: sem database ou código', 'error');
+                return;
+            }
             
             try {
-                // Referência aos registros deste dispositivo
-                registrosRef = database.ref('devices/' + DEVICE_ID + '/registros');
+                // Referência base usando o código de sincronização
+                const baseRef = database.ref('syncCodes/' + SYNC_CODE);
                 
-                // Listener para registros (value = toda a lista)
-                registrosRef.on('value', (snapshot) => {
+                // Listener para registros
+                registrosRef = baseRef.child('registros');
+                const registrosListener = registrosRef.on('value', (snapshot) => {
                     const dadosFirebase = [];
                     const val = snapshot.val();
                     
                     if (val) {
-                        // Converter objeto Firebase em array
                         Object.keys(val).forEach(key => {
                             dadosFirebase.push({
                                 id: key,
@@ -1757,7 +1947,7 @@
                     
                     cloudRegistrosCount = dadosFirebase.length;
                     updateDebugUI('cloudCount', cloudRegistrosCount);
-                    addDebugLog('Dados recebidos da nuvem: ' + dadosFirebase.length + ' registros');
+                    addDebugLog('Dados da nuvem recebidos: ' + dadosFirebase.length + ' registros');
                     
                     // Merge com dados locais (nuvem tem prioridade)
                     if (dadosFirebase.length > 0) {
@@ -1775,12 +1965,13 @@
                     addDebugLog('Erro listener: ' + error.message, 'error');
                     atualizarSyncStatus('offline');
                     updateDebugUI('sync', 'Erro', 'error');
-                    updateDebugUI('error', error.message);
                 });
+                
+                syncListeners.push({ ref: registrosRef, type: 'value', callback: registrosListener });
 
                 // Listener para meta
-                metaRef = database.ref('devices/' + DEVICE_ID + '/config/meta');
-                metaRef.on('value', (snapshot) => {
+                metaRef = baseRef.child('config/meta');
+                const metaListener = metaRef.on('value', (snapshot) => {
                     const val = snapshot.val();
                     if (val && val.valor) {
                         META_MENSAL = val.valor;
@@ -1793,16 +1984,25 @@
                     console.error('❌ Erro na meta:', error);
                 });
                 
+                syncListeners.push({ ref: metaRef, type: 'value', callback: metaListener });
+                
                 // Monitorar conexão
-                database.ref('.info/connected').on('value', (snap) => {
+                const connectedRef = database.ref('.info/connected');
+                const connectedListener = connectedRef.on('value', (snap) => {
                     if (snap.val() === true) {
                         addDebugLog('Conexão restaurada', 'success');
                         atualizarSyncStatus('online');
+                        updateDebugUI('connection', 'Online', 'success');
                     } else {
                         addDebugLog('Conexão perdida', 'warning');
                         atualizarSyncStatus('offline');
+                        updateDebugUI('connection', 'Offline', 'warning');
                     }
                 });
+                
+                syncListeners.push({ ref: connectedRef, type: 'value', callback: connectedListener });
+                
+                addDebugLog('Listeners configurados para código: ' + SYNC_CODE, 'success');
                 
             } catch (error) {
                 console.error('❌ Erro ao setup listeners:', error);
@@ -1865,7 +2065,8 @@
                     lucroLiquido: lucroLiquido,
                     ganhoPorHora: ganhoPorHora,
                     ganhoPorKm: ganhoPorKm
-                }
+                },
+                lastModified: Date.now()
             };
 
             try {
@@ -1972,7 +2173,7 @@
                 // Sincronizar com Firebase
                 if (firebaseOnline && metaRef) {
                     try {
-                        await metaRef.set({ valor: valor });
+                        await metaRef.set({ valor: valor, lastModified: Date.now() });
                         addDebugLog('Meta salva na nuvem: R$ ' + valor);
                     } catch (e) {
                         addDebugLog('Falha ao salvar meta na nuvem: ' + e.message, 'warning');
@@ -2066,7 +2267,6 @@
             
             log.insertBefore(entry, log.firstChild);
             
-            // Manter apenas últimas 20 entradas
             while (log.children.length > 20) {
                 log.removeChild(log.lastChild);
             }
@@ -2088,6 +2288,11 @@
                 if (connected) {
                     addDebugLog('Conexão OK!', 'success');
                     updateDebugUI('connection', 'Online', 'success');
+                    
+                    // Testa acesso ao nó atual
+                    const codeRef = database.ref('syncCodes/' + SYNC_CODE);
+                    await codeRef.child('test').set({ timestamp: Date.now() });
+                    addDebugLog('Acesso ao nó ' + SYNC_CODE + ' OK', 'success');
                 } else {
                     addDebugLog('Sem conexão', 'warning');
                     updateDebugUI('connection', 'Offline', 'warning');
@@ -2106,21 +2311,23 @@
             }
             
             try {
-                // Enviar todos os registros locais para nuvem
                 const updates = {};
                 registros.forEach(r => {
                     updates[r.id] = {
                         timestamp: r.timestamp,
                         data: r.data,
                         valores: r.valores,
-                        calculados: r.calculados
+                        calculados: r.calculados,
+                        lastModified: Date.now()
                     };
                 });
                 
                 await registrosRef.update(updates);
                 addDebugLog('Sincronização forçada: ' + registros.length + ' registros', 'success');
+                showToast(registros.length + ' registros sincronizados!', 'success');
             } catch (error) {
                 addDebugLog('Erro na sincronização: ' + error.message, 'error');
+                showToast('Erro ao sincronizar', 'error');
             }
         }
 
@@ -2140,7 +2347,7 @@
         }
 
         // ==========================================
-        // UI FUNCTIONS (mantidas do código original)
+        // UI FUNCTIONS
         // ==========================================
 
         function atualizarSyncStatus(status) {
@@ -2152,12 +2359,15 @@
             if (status === 'online') {
                 syncStatus.classList.add('online');
                 syncText.textContent = 'Sincronizado ☁️';
+                updateDebugUI('firebaseStatus', 'Conectado', 'success');
             } else if (status === 'offline') {
                 syncStatus.classList.add('offline');
                 syncText.textContent = 'Modo offline 💾';
+                updateDebugUI('firebaseStatus', 'Offline', 'warning');
             } else if (status === 'error') {
                 syncStatus.classList.add('error');
                 syncText.textContent = 'Erro de conexão ⚠️';
+                updateDebugUI('firebaseStatus', 'Erro', 'error');
             } else {
                 syncText.textContent = 'Inicializando...';
             }
@@ -2575,6 +2785,11 @@
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
             }
+        });
+
+        // Máscara para input de código (apenas números)
+        document.getElementById('novoSyncCode')?.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
         });
     </script>
 </body>
