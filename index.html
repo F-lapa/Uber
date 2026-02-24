@@ -91,6 +91,36 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Debug Panel */
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            max-width: 300px;
+            z-index: 9998;
+            display: none;
+        }
+
+        .debug-panel.show {
+            display: block;
+        }
+
+        .debug-title {
+            color: var(--primary-light);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .debug-item {
+            margin-bottom: 4px;
+        }
+
         /* Background Animado */
         .bg-animation {
             position: fixed;
@@ -186,6 +216,11 @@
             font-size: 0.75rem;
             color: var(--success);
             margin-top: 10px;
+        }
+
+        .sync-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
         }
 
         .sync-status.offline {
@@ -1097,7 +1132,16 @@
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Inicializando DriverPro...</div>
+        <div class="loading-text" id="loadingText">Inicializando DriverPro...</div>
+    </div>
+
+    <!-- Debug Panel (pressione Ctrl+Shift+D para mostrar) -->
+    <div class="debug-panel" id="debugPanel">
+        <div class="debug-title">🔧 Debug Info</div>
+        <div class="debug-item" id="debugDeviceId">Device ID: -</div>
+        <div class="debug-item" id="debugStatus">Status: -</div>
+        <div class="debug-item" id="debugRegistros">Registros: 0</div>
+        <div class="debug-item" id="debugError">Erro: -</div>
     </div>
 
     <!-- Toast Container -->
@@ -1113,7 +1157,7 @@
             <p>Calculadora inteligente de ganhos para motoristas</p>
             <div class="sync-status" id="syncStatus">
                 <span class="sync-dot"></span>
-                <span id="syncText">Sincronizado</span>
+                <span id="syncText">Inicializando...</span>
             </div>
         </header>
 
@@ -1363,8 +1407,16 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        let db = null;
+        let firebaseApp = null;
+        
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log('✅ Firebase inicializado com sucesso');
+        } catch (error) {
+            console.error('❌ Erro ao inicializar Firebase:', error);
+        }
 
         // App State
         let registros = [];
@@ -1372,11 +1424,16 @@
         let registroExcluir = null;
         let META_MENSAL = 5000;
         let DEVICE_ID = null;
+        let firebaseEnabled = false;
         let unsubscribeRegistros = null;
         let unsubscribeMeta = null;
 
+        // Debug
+        let lastError = null;
+
         // DOM Elements
         const loadingScreen = document.getElementById('loadingScreen');
+        const loadingText = document.getElementById('loadingText');
         const syncStatus = document.getElementById('syncStatus');
         const syncText = document.getElementById('syncText');
 
@@ -1387,39 +1444,76 @@
 
         async function inicializarSistema() {
             try {
-                // Get or create device ID (simulates a user without login)
+                // Get or create device ID
                 DEVICE_ID = localStorage.getItem('driverPro_deviceId');
                 if (!DEVICE_ID) {
-                    DEVICE_ID = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    DEVICE_ID = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                     localStorage.setItem('driverPro_deviceId', DEVICE_ID);
                 }
-
-                // Load local data first (fast)
-                carregarDadosLocais();
                 
-                // Setup Firestore listeners (background sync)
-                setupFirestoreListeners();
+                console.log('📱 Device ID:', DEVICE_ID);
+                updateDebug('deviceId', DEVICE_ID);
+
+                // Load local data first (always works)
+                carregarDadosLocais();
+                console.log('💾 Dados locais carregados:', registros.length, 'registros');
+                updateDebug('registros', registros.length);
+
+                // Try to enable Firebase
+                if (db) {
+                    try {
+                        await testarFirestore();
+                        firebaseEnabled = true;
+                        setupFirestoreListeners();
+                        atualizarSyncStatus('online');
+                        console.log('☁️ Firebase ativo');
+                        updateDebug('status', 'Online');
+                    } catch (error) {
+                        console.warn('⚠️ Firebase indisponível:', error.message);
+                        lastError = error.message;
+                        atualizarSyncStatus('offline');
+                        updateDebug('status', 'Offline');
+                        updateDebug('error', error.message);
+                    }
+                } else {
+                    atualizarSyncStatus('offline');
+                    updateDebug('status', 'Sem Firebase');
+                }
+                
+                // Initialize UI
+                inicializarApp();
                 
                 // Hide loading
                 setTimeout(() => {
                     loadingScreen.classList.add('hidden');
                 }, 500);
                 
-                // Initialize UI
-                inicializarApp();
-                
             } catch (error) {
-                console.error('Erro na inicialização:', error);
-                // Even if Firebase fails, show the app with local data
+                console.error('❌ Erro na inicialização:', error);
+                lastError = error.message;
+                updateDebug('error', error.message);
+                
+                // Even if everything fails, show the app with local data
                 carregarDadosLocais();
                 inicializarApp();
                 loadingScreen.classList.add('hidden');
-                atualizarSyncStatus(false);
+                atualizarSyncStatus('error');
+            }
+        }
+
+        async function testarFirestore() {
+            // Test if Firestore is accessible
+            const testRef = db.collection('_test').doc('connection');
+            try {
+                await testRef.set({ timestamp: Date.now() }, { merge: true });
+                return true;
+            } catch (error) {
+                throw new Error('Permissão negada. Verifique as regras do Firestore.');
             }
         }
 
         function setupFirestoreListeners() {
-            if (!DEVICE_ID) return;
+            if (!db || !DEVICE_ID) return;
             
             try {
                 // Listen to registros
@@ -1431,6 +1525,8 @@
                             dadosFirestore.push({ id: doc.id, ...doc.data() });
                         });
                         
+                        console.log('📥 Dados do Firestore:', dadosFirestore.length, 'registros');
+                        
                         // Merge with local data (Firestore takes precedence)
                         if (dadosFirestore.length > 0) {
                             registros = mergeDados(registros, dadosFirestore);
@@ -1438,10 +1534,12 @@
                             atualizarDashboardEFiltros();
                         }
                         
-                        atualizarSyncStatus(true);
+                        atualizarSyncStatus('online');
                     }, (error) => {
-                        console.log('Firestore error (modo offline):', error);
-                        atualizarSyncStatus(false);
+                        console.error('❌ Erro no listener:', error);
+                        lastError = error.message;
+                        atualizarSyncStatus('offline');
+                        updateDebug('error', error.message);
                     });
 
                 // Listen to meta
@@ -1453,25 +1551,19 @@
                             atualizarDashboardEFiltros();
                         }
                     }, (error) => {
-                        console.log('Meta sync error:', error);
+                        console.error('❌ Erro na meta:', error);
                     });
                     
             } catch (error) {
-                console.error('Erro ao setup listeners:', error);
-                atualizarSyncStatus(false);
+                console.error('❌ Erro ao setup listeners:', error);
+                lastError = error.message;
             }
         }
 
         function mergeDados(local, nuvem) {
-            // Create a map for fast lookup
             const map = new Map();
-            
-            // Add local data
             local.forEach(r => map.set(r.id, r));
-            
-            // Add/Update with cloud data (cloud wins)
             nuvem.forEach(r => map.set(r.id, r));
-            
             return Array.from(map.values());
         }
 
@@ -1502,13 +1594,20 @@
         }
 
         // Sync Status
-        function atualizarSyncStatus(online) {
-            if (online) {
-                syncStatus.classList.remove('offline');
+        function atualizarSyncStatus(status) {
+            syncStatus.className = 'sync-status';
+            
+            if (status === 'online') {
+                syncStatus.classList.add('online');
                 syncText.textContent = 'Sincronizado ☁️';
-            } else {
+            } else if (status === 'offline') {
                 syncStatus.classList.add('offline');
                 syncText.textContent = 'Modo offline 💾';
+            } else if (status === 'error') {
+                syncStatus.classList.add('error');
+                syncText.textContent = 'Erro de conexão ⚠️';
+            } else {
+                syncText.textContent = 'Inicializando...';
             }
         }
 
@@ -1645,11 +1744,16 @@
                         registros[index] = { ...registroData, id: registroId };
                     }
                     
-                    // Sync to Firestore
-                    if (DEVICE_ID) {
-                        await db.collection('devices').doc(DEVICE_ID)
-                            .collection('registros').doc(registroId)
-                            .set(registroData);
+                    // Try to sync to Firestore
+                    if (firebaseEnabled && db && DEVICE_ID) {
+                        try {
+                            await db.collection('devices').doc(DEVICE_ID)
+                                .collection('registros').doc(registroId)
+                                .set(registroData);
+                            console.log('✅ Atualizado no Firestore');
+                        } catch (e) {
+                            console.warn('⚠️ Falha ao sincronizar:', e.message);
+                        }
                     }
                     
                     showToast('Registro atualizado!', 'success');
@@ -1659,18 +1763,24 @@
                     registroId = Date.now().toString();
                     registros.push({ ...registroData, id: registroId });
                     
-                    // Sync to Firestore
-                    if (DEVICE_ID) {
-                        await db.collection('devices').doc(DEVICE_ID)
-                            .collection('registros').doc(registroId)
-                            .set(registroData);
+                    // Try to sync to Firestore
+                    if (firebaseEnabled && db && DEVICE_ID) {
+                        try {
+                            await db.collection('devices').doc(DEVICE_ID)
+                                .collection('registros').doc(registroId)
+                                .set(registroData);
+                            console.log('✅ Salvo no Firestore');
+                        } catch (e) {
+                            console.warn('⚠️ Falha ao sincronizar:', e.message);
+                        }
                     }
                     
                     showToast('Registro salvo!', 'success');
                 }
 
-                // Save locally
+                // Always save locally
                 salvarDadosLocais();
+                updateDebug('registros', registros.length);
                 
                 // Update UI
                 mostrarResultados({ ...registroData, id: registroId });
@@ -1678,11 +1788,8 @@
                 limparFormulario();
                 
             } catch (error) {
-                console.error('Erro ao salvar:', error);
-                // Still save locally even if Firestore fails
-                salvarDadosLocais();
-                atualizarDashboardEFiltros();
-                showToast('Salvo localmente (offline)', 'info');
+                console.error('❌ Erro ao salvar:', error);
+                showToast('Erro ao salvar. Tente novamente.', 'error');
             } finally {
                 btn.disabled = false;
             }
@@ -1693,21 +1800,26 @@
                 // Remove from local
                 registros = registros.filter(r => r.id !== id);
                 salvarDadosLocais();
+                updateDebug('registros', registros.length);
                 
-                // Remove from Firestore
-                if (DEVICE_ID) {
-                    await db.collection('devices').doc(DEVICE_ID)
-                        .collection('registros').doc(id).delete();
+                // Try to remove from Firestore
+                if (firebaseEnabled && db && DEVICE_ID) {
+                    try {
+                        await db.collection('devices').doc(DEVICE_ID)
+                            .collection('registros').doc(id).delete();
+                        console.log('✅ Excluído do Firestore');
+                    } catch (e) {
+                        console.warn('⚠️ Falha ao excluir da nuvem:', e.message);
+                    }
                 }
                 
                 atualizarDashboardEFiltros();
                 showToast('Registro excluído', 'success');
                 fecharModal('modalConfirmar');
             } catch (error) {
-                console.error('Erro ao excluir:', error);
-                // Already removed locally, just update UI
+                console.error('❌ Erro ao excluir:', error);
                 atualizarDashboardEFiltros();
-                showToast('Excluído localmente', 'info');
+                showToast('Erro ao excluir', 'error');
             }
         }
 
@@ -1725,18 +1837,23 @@
                 META_MENSAL = valor;
                 salvarDadosLocais();
                 
-                // Sync to Firestore
-                if (DEVICE_ID) {
-                    await db.collection('devices').doc(DEVICE_ID)
-                        .collection('config').doc('meta')
-                        .set({ valor: valor });
+                // Try to sync to Firestore
+                if (firebaseEnabled && db && DEVICE_ID) {
+                    try {
+                        await db.collection('devices').doc(DEVICE_ID)
+                            .collection('config').doc('meta')
+                            .set({ valor: valor });
+                        console.log('✅ Meta salva no Firestore');
+                    } catch (e) {
+                        console.warn('⚠️ Falha ao sincronizar meta:', e.message);
+                    }
                 }
                 
                 atualizarDashboardEFiltros();
                 fecharModal('modalMeta');
                 showToast(`Meta atualizada: ${formatarMoeda(valor)}`, 'success');
             } catch (error) {
-                console.error('Erro ao salvar meta:', error);
+                console.error('❌ Erro ao salvar meta:', error);
                 atualizarDashboardEFiltros();
                 fecharModal('modalMeta');
                 showToast('Meta salva localmente', 'info');
@@ -2049,6 +2166,22 @@
             document.querySelector('.btn-primary').innerHTML = '<span>🚀</span> Calcular e Salvar';
             document.getElementById('resultados').classList.remove('show');
         }
+
+        // Debug Functions
+        function updateDebug(key, value) {
+            const element = document.getElementById('debug' + key.charAt(0).toUpperCase() + key.slice(1));
+            if (element) {
+                element.textContent = key.charAt(0).toUpperCase() + key.slice(1) + ': ' + value;
+            }
+        }
+
+        // Show debug panel with Ctrl+Shift+D
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                document.getElementById('debugPanel').classList.toggle('show');
+            }
+        });
 
         // Utilities
         function showToast(message, type = 'info') {
