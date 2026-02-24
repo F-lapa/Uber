@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DriverPro - Calculadora Inteligente</title>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Realtime Database) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -91,34 +90,169 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Debug Panel */
+        /* Debug Panel - Agora sempre visível e mais detalhado */
         .debug-panel {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--primary);
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 0.75rem;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            max-width: 300px;
+            width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
             z-index: 9998;
-            display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
         }
 
-        .debug-panel.show {
-            display: block;
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
         }
 
         .debug-title {
             color: var(--primary-light);
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .debug-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .debug-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .debug-section {
+            margin-bottom: 16px;
+        }
+
+        .debug-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
             margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .debug-item {
-            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .debug-item:last-child {
+            border-bottom: none;
+        }
+
+        .debug-label {
+            color: var(--text-secondary);
+        }
+
+        .debug-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+
+        .debug-value.success { color: var(--success); }
+        .debug-value.error { color: var(--danger); }
+        .debug-value.warning { color: var(--warning); }
+
+        .debug-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .debug-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .debug-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .debug-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .debug-log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .debug-log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 9997;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .debug-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .debug-toggle.hidden {
+            display: none;
         }
 
         /* Background Animado */
@@ -397,6 +531,12 @@
         @media (max-width: 968px) {
             .main-layout {
                 grid-template-columns: 1fr;
+            }
+            
+            .debug-panel {
+                width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
             }
         }
 
@@ -1125,6 +1265,16 @@
             .btn-edit-meta {
                 opacity: 1;
             }
+            
+            .debug-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+                max-height: 60vh;
+            }
         }
     </style>
 </head>
@@ -1135,13 +1285,68 @@
         <div class="loading-text" id="loadingText">Inicializando DriverPro...</div>
     </div>
 
-    <!-- Debug Panel (pressione Ctrl+Shift+D para mostrar) -->
-    <div class="debug-panel" id="debugPanel">
-        <div class="debug-title">🔧 Debug Info</div>
-        <div class="debug-item" id="debugDeviceId">Device ID: -</div>
-        <div class="debug-item" id="debugStatus">Status: -</div>
-        <div class="debug-item" id="debugRegistros">Registros: 0</div>
-        <div class="debug-item" id="debugError">Erro: -</div>
+    <!-- Debug Toggle Button -->
+    <button class="debug-toggle" id="debugToggle" onclick="toggleDebugPanel()" title="Abrir Debug">🐛</button>
+
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debugPanel" style="display: none;">
+        <div class="debug-header">
+            <div class="debug-title">🔧 Painel de Debug</div>
+            <button class="debug-close" onclick="toggleDebugPanel()">×</button>
+        </div>
+        
+        <div class="debug-section">
+            <div class="debug-section-title">Status do Sistema</div>
+            <div class="debug-item">
+                <span class="debug-label">Firebase RTDB</span>
+                <span class="debug-value" id="debugFirebaseStatus">Verificando...</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Conexão</span>
+                <span class="debug-value" id="debugConnection">Verificando...</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Device ID</span>
+                <span class="debug-value" id="debugDeviceId">-</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Sincronização</span>
+                <span class="debug-value" id="debugSync">-</span>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-section-title">Dados</div>
+            <div class="debug-item">
+                <span class="debug-label">Registros Locais</span>
+                <span class="debug-value" id="debugLocalCount">0</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Registros Nuvem</span>
+                <span class="debug-value" id="debugCloudCount">0</span>
+            </div>
+            <div class="debug-item">
+                <span class="debug-label">Meta Mensal</span>
+                <span class="debug-value" id="debugMeta">R$ 0</span>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <div class="debug-section-title">Último Erro</div>
+            <div class="debug-item">
+                <span class="debug-value error" id="debugError" style="font-size: 0.75rem;">Nenhum</span>
+            </div>
+        </div>
+
+        <div class="debug-actions">
+            <button class="debug-btn" onclick="testarConexao()">🔄 Testar</button>
+            <button class="debug-btn" onclick="forcarSync()">☁️ Sincronizar</button>
+            <button class="debug-btn" onclick="limparDados()">🗑️ Limpar</button>
+        </div>
+
+        <div class="debug-log" id="debugLog">
+            <div class="debug-log-entry">Sistema iniciado...</div>
+        </div>
     </div>
 
     <!-- Toast Container -->
@@ -1395,10 +1600,14 @@
     </div>
 
     <script>
-        // Firebase Configuration
+        // ==========================================
+        // CONFIGURAÇÃO FIREBASE REALTIME DATABASE
+        // ==========================================
+        
         const firebaseConfig = {
             apiKey: "AIzaSyAQsBV25b7ZHR12NjuLDdxGH1EisVetstQ",
             authDomain: "uber-2bf50.firebaseapp.com",
+            databaseURL: "https://uber-2bf50-default-rtdb.firebaseio.com", // IMPORTANTE: URL do Realtime Database
             projectId: "uber-2bf50",
             storageBucket: "uber-2bf50.firebasestorage.app",
             messagingSenderId: "714296805246",
@@ -1407,278 +1616,204 @@
         };
 
         // Initialize Firebase
-        let db = null;
-        let firebaseApp = null;
+        let app = null;
+        let database = null;
+        let registrosRef = null;
+        let metaRef = null;
         
         try {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            console.log('✅ Firebase inicializado com sucesso');
+            app = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log('✅ Firebase Realtime Database inicializado com sucesso');
+            addDebugLog('Firebase inicializado');
         } catch (error) {
             console.error('❌ Erro ao inicializar Firebase:', error);
+            addDebugLog('Erro Firebase: ' + error.message, 'error');
         }
 
-        // App State
+        // ==========================================
+        // ESTADO DA APLICAÇÃO
+        // ==========================================
+        
         let registros = [];
         let registroEditando = null;
         let registroExcluir = null;
         let META_MENSAL = 5000;
         let DEVICE_ID = null;
-        let firebaseEnabled = false;
-        let unsubscribeRegistros = null;
-        let unsubscribeMeta = null;
+        let firebaseOnline = false;
+        let cloudRegistrosCount = 0;
 
-        // Debug
-        let lastError = null;
-
-        // DOM Elements
-        const loadingScreen = document.getElementById('loadingScreen');
-        const loadingText = document.getElementById('loadingText');
-        const syncStatus = document.getElementById('syncStatus');
-        const syncText = document.getElementById('syncText');
-
-        // Initialize on Load
+        // ==========================================
+        // INICIALIZAÇÃO
+        // ==========================================
+        
         document.addEventListener('DOMContentLoaded', async () => {
             await inicializarSistema();
         });
 
         async function inicializarSistema() {
             try {
-                // Get or create device ID
+                // 1. Gerar/obter Device ID
                 DEVICE_ID = localStorage.getItem('driverPro_deviceId');
                 if (!DEVICE_ID) {
                     DEVICE_ID = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                     localStorage.setItem('driverPro_deviceId', DEVICE_ID);
+                    addDebugLog('Novo Device ID criado: ' + DEVICE_ID);
+                } else {
+                    addDebugLog('Device ID existente: ' + DEVICE_ID);
                 }
-                
-                console.log('📱 Device ID:', DEVICE_ID);
-                updateDebug('deviceId', DEVICE_ID);
+                updateDebugUI('deviceId', DEVICE_ID);
 
-                // Load local data first (always works)
+                // 2. Carregar dados locais primeiro (sempre funciona)
                 carregarDadosLocais();
-                console.log('💾 Dados locais carregados:', registros.length, 'registros');
-                updateDebug('registros', registros.length);
+                addDebugLog('Dados locais carregados: ' + registros.length + ' registros');
+                updateDebugUI('localCount', registros.length);
 
-                // Try to enable Firebase
-                if (db) {
+                // 3. Tentar conectar ao Firebase Realtime Database
+                if (database) {
                     try {
-                        await testarFirestore();
-                        firebaseEnabled = true;
-                        setupFirestoreListeners();
+                        await testarRealtimeDatabase();
+                        firebaseOnline = true;
+                        setupRealtimeListeners();
                         atualizarSyncStatus('online');
-                        console.log('☁️ Firebase ativo');
-                        updateDebug('status', 'Online');
+                        addDebugLog('Conectado ao Realtime Database', 'success');
+                        updateDebugUI('firebaseStatus', 'Conectado', 'success');
+                        updateDebugUI('connection', 'Online', 'success');
                     } catch (error) {
                         console.warn('⚠️ Firebase indisponível:', error.message);
-                        lastError = error.message;
                         atualizarSyncStatus('offline');
-                        updateDebug('status', 'Offline');
-                        updateDebug('error', error.message);
+                        addDebugLog('Firebase offline: ' + error.message, 'warning');
+                        updateDebugUI('firebaseStatus', 'Erro', 'error');
+                        updateDebugUI('connection', 'Offline', 'warning');
+                        updateDebugUI('error', error.message);
                     }
                 } else {
                     atualizarSyncStatus('offline');
-                    updateDebug('status', 'Sem Firebase');
+                    addDebugLog('Firebase não inicializado', 'warning');
+                    updateDebugUI('firebaseStatus', 'Não inicializado', 'error');
                 }
-                
-                // Initialize UI
+
+                // 4. Inicializar UI
                 inicializarApp();
                 
-                // Hide loading
+                // 5. Esconder loading
                 setTimeout(() => {
-                    loadingScreen.classList.add('hidden');
-                }, 500);
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                }, 800);
                 
             } catch (error) {
                 console.error('❌ Erro na inicialização:', error);
-                lastError = error.message;
-                updateDebug('error', error.message);
+                addDebugLog('Erro crítico: ' + error.message, 'error');
+                updateDebugUI('error', error.message);
                 
-                // Even if everything fails, show the app with local data
+                // Mesmo com erro, mostrar app com dados locais
                 carregarDadosLocais();
                 inicializarApp();
-                loadingScreen.classList.add('hidden');
+                document.getElementById('loadingScreen').classList.add('hidden');
                 atualizarSyncStatus('error');
             }
         }
 
-        async function testarFirestore() {
-            // Test if Firestore is accessible
-            const testRef = db.collection('_test').doc('connection');
-            try {
-                await testRef.set({ timestamp: Date.now() }, { merge: true });
-                return true;
-            } catch (error) {
-                throw new Error('Permissão negada. Verifique as regras do Firestore.');
-            }
-        }
+        // ==========================================
+        // FUNÇÕES FIREBASE REALTIME DATABASE
+        // ==========================================
 
-        function setupFirestoreListeners() {
-            if (!db || !DEVICE_ID) return;
+        async function testarRealtimeDatabase() {
+            // Testar conexão tentando escrever um valor de teste
+            const testRef = database.ref('.info/connected');
+            const snapshot = await testRef.once('value');
             
-            try {
-                // Listen to registros
-                unsubscribeRegistros = db.collection('devices').doc(DEVICE_ID).collection('registros')
-                    .orderBy('timestamp', 'desc')
-                    .onSnapshot((snapshot) => {
-                        const dadosFirestore = [];
-                        snapshot.forEach((doc) => {
-                            dadosFirestore.push({ id: doc.id, ...doc.data() });
-                        });
-                        
-                        console.log('📥 Dados do Firestore:', dadosFirestore.length, 'registros');
-                        
-                        // Merge with local data (Firestore takes precedence)
-                        if (dadosFirestore.length > 0) {
-                            registros = mergeDados(registros, dadosFirestore);
-                            salvarDadosLocais();
-                            atualizarDashboardEFiltros();
-                        }
-                        
-                        atualizarSyncStatus('online');
-                    }, (error) => {
-                        console.error('❌ Erro no listener:', error);
-                        lastError = error.message;
-                        atualizarSyncStatus('offline');
-                        updateDebug('error', error.message);
-                    });
-
-                // Listen to meta
-                unsubscribeMeta = db.collection('devices').doc(DEVICE_ID).collection('config').doc('meta')
-                    .onSnapshot((doc) => {
-                        if (doc.exists) {
-                            META_MENSAL = doc.data().valor || 5000;
-                            localStorage.setItem('driverPro_meta', META_MENSAL);
-                            atualizarDashboardEFiltros();
-                        }
-                    }, (error) => {
-                        console.error('❌ Erro na meta:', error);
-                    });
-                    
-            } catch (error) {
-                console.error('❌ Erro ao setup listeners:', error);
-                lastError = error.message;
-            }
-        }
-
-        function mergeDados(local, nuvem) {
-            const map = new Map();
-            local.forEach(r => map.set(r.id, r));
-            nuvem.forEach(r => map.set(r.id, r));
-            return Array.from(map.values());
-        }
-
-        // Local Data Functions
-        function carregarDadosLocais() {
-            try {
-                const dados = localStorage.getItem('driverPro_registros');
-                const meta = localStorage.getItem('driverPro_meta');
-                
-                if (dados) {
-                    registros = JSON.parse(dados);
-                }
-                if (meta) {
-                    META_MENSAL = parseFloat(meta);
-                }
-            } catch (e) {
-                console.error('Erro no cache local:', e);
-            }
-        }
-
-        function salvarDadosLocais() {
-            try {
-                localStorage.setItem('driverPro_registros', JSON.stringify(registros));
-                localStorage.setItem('driverPro_meta', META_MENSAL.toString());
-            } catch (e) {
-                console.error('Erro ao salvar local:', e);
-            }
-        }
-
-        // Sync Status
-        function atualizarSyncStatus(status) {
-            syncStatus.className = 'sync-status';
-            
-            if (status === 'online') {
-                syncStatus.classList.add('online');
-                syncText.textContent = 'Sincronizado ☁️';
-            } else if (status === 'offline') {
-                syncStatus.classList.add('offline');
-                syncText.textContent = 'Modo offline 💾';
-            } else if (status === 'error') {
-                syncStatus.classList.add('error');
-                syncText.textContent = 'Erro de conexão ⚠️';
-            } else {
-                syncText.textContent = 'Inicializando...';
-            }
-        }
-
-        // App Initialization
-        function inicializarApp() {
-            inicializarData();
-            setupValidacao();
-            setupMascaraHoras();
-            atualizarFiltroAnos();
-            atualizarDashboardEFiltros();
-        }
-
-        // Core Functions
-        function inicializarData() {
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('dataRegistro').value = hoje;
-        }
-
-        function setupValidacao() {
-            const inputs = document.querySelectorAll('input[required]');
-            inputs.forEach(input => {
-                input.addEventListener('blur', () => validarCampo(input));
-                input.addEventListener('input', () => {
-                    if (input.classList.contains('error')) {
-                        input.classList.remove('error');
-                    }
-                });
+            // Verificar se conseguimos acessar o nó do dispositivo
+            const deviceRef = database.ref('devices/' + DEVICE_ID);
+            await deviceRef.child('lastAccess').set({
+                timestamp: Date.now(),
+                userAgent: navigator.userAgent.substring(0, 50)
             });
-        }
-
-        function validarCampo(input) {
-            if (!input.value || input.value <= 0) {
-                input.classList.add('error');
-                return false;
-            }
-            input.classList.remove('error');
+            
             return true;
         }
 
-        function setupMascaraHoras() {
-            const input = document.getElementById('horasTrabalhadas');
-            input.addEventListener('input', (e) => {
-                let valor = e.target.value.replace(/\D/g, '');
-                if (valor.length > 4) valor = valor.slice(0, 4);
+        function setupRealtimeListeners() {
+            if (!database || !DEVICE_ID) return;
+            
+            try {
+                // Referência aos registros deste dispositivo
+                registrosRef = database.ref('devices/' + DEVICE_ID + '/registros');
                 
-                if (valor.length >= 2) {
-                    let horas = valor.slice(0, 2);
-                    let minutos = valor.slice(2, 4);
+                // Listener para registros (value = toda a lista)
+                registrosRef.on('value', (snapshot) => {
+                    const dadosFirebase = [];
+                    const val = snapshot.val();
                     
-                    if (parseInt(horas) > 23) horas = '23';
-                    if (minutos && parseInt(minutos) > 59) minutos = '59';
+                    if (val) {
+                        // Converter objeto Firebase em array
+                        Object.keys(val).forEach(key => {
+                            dadosFirebase.push({
+                                id: key,
+                                ...val[key]
+                            });
+                        });
+                    }
                     
-                    e.target.value = minutos ? `${horas}:${minutos}` : `${horas}:`;
-                } else {
-                    e.target.value = valor;
-                }
-            });
+                    cloudRegistrosCount = dadosFirebase.length;
+                    updateDebugUI('cloudCount', cloudRegistrosCount);
+                    addDebugLog('Dados recebidos da nuvem: ' + dadosFirebase.length + ' registros');
+                    
+                    // Merge com dados locais (nuvem tem prioridade)
+                    if (dadosFirebase.length > 0) {
+                        registros = mergeDados(registros, dadosFirebase);
+                        salvarDadosLocais();
+                        atualizarDashboardEFiltros();
+                        updateDebugUI('localCount', registros.length);
+                    }
+                    
+                    atualizarSyncStatus('online');
+                    updateDebugUI('sync', 'Sincronizado', 'success');
+                    
+                }, (error) => {
+                    console.error('❌ Erro no listener:', error);
+                    addDebugLog('Erro listener: ' + error.message, 'error');
+                    atualizarSyncStatus('offline');
+                    updateDebugUI('sync', 'Erro', 'error');
+                    updateDebugUI('error', error.message);
+                });
+
+                // Listener para meta
+                metaRef = database.ref('devices/' + DEVICE_ID + '/config/meta');
+                metaRef.on('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (val && val.valor) {
+                        META_MENSAL = val.valor;
+                        localStorage.setItem('driverPro_meta', META_MENSAL);
+                        atualizarDashboardEFiltros();
+                        updateDebugUI('meta', 'R$ ' + META_MENSAL);
+                        addDebugLog('Meta atualizada da nuvem: R$ ' + META_MENSAL);
+                    }
+                }, (error) => {
+                    console.error('❌ Erro na meta:', error);
+                });
+                
+                // Monitorar conexão
+                database.ref('.info/connected').on('value', (snap) => {
+                    if (snap.val() === true) {
+                        addDebugLog('Conexão restaurada', 'success');
+                        atualizarSyncStatus('online');
+                    } else {
+                        addDebugLog('Conexão perdida', 'warning');
+                        atualizarSyncStatus('offline');
+                    }
+                });
+                
+            } catch (error) {
+                console.error('❌ Erro ao setup listeners:', error);
+                addDebugLog('Erro setup: ' + error.message, 'error');
+            }
         }
 
-        function horasParaDecimal(horasStr) {
-            const [horas, minutos] = horasStr.split(':').map(Number);
-            return horas + (minutos || 0) / 60;
-        }
+        // ==========================================
+        // OPERAÇÕES CRUD
+        // ==========================================
 
-        function decimalParaHoras(decimal) {
-            const horas = Math.floor(decimal);
-            const minutos = Math.round((decimal - horas) * 60);
-            return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
-        }
-
-        // CRUD Operations
         async function calcularESalvar() {
             const btn = document.getElementById('btnCalcular');
             btn.disabled = true;
@@ -1737,58 +1872,55 @@
                 let registroId;
                 
                 if (registroEditando) {
-                    // Update existing
+                    // Atualizar existente
                     registroId = registroEditando;
                     const index = registros.findIndex(r => r.id === registroEditando);
                     if (index !== -1) {
                         registros[index] = { ...registroData, id: registroId };
                     }
                     
-                    // Try to sync to Firestore
-                    if (firebaseEnabled && db && DEVICE_ID) {
+                    // Sincronizar com Firebase
+                    if (firebaseOnline && registrosRef) {
                         try {
-                            await db.collection('devices').doc(DEVICE_ID)
-                                .collection('registros').doc(registroId)
-                                .set(registroData);
-                            console.log('✅ Atualizado no Firestore');
+                            await registrosRef.child(registroId).set(registroData);
+                            addDebugLog('Registro atualizado na nuvem: ' + registroId);
                         } catch (e) {
-                            console.warn('⚠️ Falha ao sincronizar:', e.message);
+                            addDebugLog('Falha ao atualizar nuvem: ' + e.message, 'warning');
                         }
                     }
                     
                     showToast('Registro atualizado!', 'success');
                     registroEditando = null;
                 } else {
-                    // Create new
+                    // Criar novo
                     registroId = Date.now().toString();
                     registros.push({ ...registroData, id: registroId });
                     
-                    // Try to sync to Firestore
-                    if (firebaseEnabled && db && DEVICE_ID) {
+                    // Sincronizar com Firebase
+                    if (firebaseOnline && registrosRef) {
                         try {
-                            await db.collection('devices').doc(DEVICE_ID)
-                                .collection('registros').doc(registroId)
-                                .set(registroData);
-                            console.log('✅ Salvo no Firestore');
+                            await registrosRef.child(registroId).set(registroData);
+                            addDebugLog('Registro salvo na nuvem: ' + registroId, 'success');
                         } catch (e) {
-                            console.warn('⚠️ Falha ao sincronizar:', e.message);
+                            addDebugLog('Falha ao salvar na nuvem: ' + e.message, 'warning');
                         }
                     }
                     
                     showToast('Registro salvo!', 'success');
                 }
 
-                // Always save locally
+                // Sempre salvar local
                 salvarDadosLocais();
-                updateDebug('registros', registros.length);
+                updateDebugUI('localCount', registros.length);
                 
-                // Update UI
+                // Atualizar UI
                 mostrarResultados({ ...registroData, id: registroId });
                 atualizarDashboardEFiltros();
                 limparFormulario();
                 
             } catch (error) {
                 console.error('❌ Erro ao salvar:', error);
+                addDebugLog('Erro ao salvar: ' + error.message, 'error');
                 showToast('Erro ao salvar. Tente novamente.', 'error');
             } finally {
                 btn.disabled = false;
@@ -1797,19 +1929,18 @@
 
         async function deletarRegistro(id) {
             try {
-                // Remove from local
+                // Remover local
                 registros = registros.filter(r => r.id !== id);
                 salvarDadosLocais();
-                updateDebug('registros', registros.length);
+                updateDebugUI('localCount', registros.length);
                 
-                // Try to remove from Firestore
-                if (firebaseEnabled && db && DEVICE_ID) {
+                // Remover do Firebase
+                if (firebaseOnline && registrosRef) {
                     try {
-                        await db.collection('devices').doc(DEVICE_ID)
-                            .collection('registros').doc(id).delete();
-                        console.log('✅ Excluído do Firestore');
+                        await registrosRef.child(id).remove();
+                        addDebugLog('Registro excluído da nuvem: ' + id);
                     } catch (e) {
-                        console.warn('⚠️ Falha ao excluir da nuvem:', e.message);
+                        addDebugLog('Falha ao excluir da nuvem: ' + e.message, 'warning');
                     }
                 }
                 
@@ -1818,6 +1949,7 @@
                 fecharModal('modalConfirmar');
             } catch (error) {
                 console.error('❌ Erro ao excluir:', error);
+                addDebugLog('Erro ao excluir: ' + error.message, 'error');
                 atualizarDashboardEFiltros();
                 showToast('Erro ao excluir', 'error');
             }
@@ -1837,30 +1969,265 @@
                 META_MENSAL = valor;
                 salvarDadosLocais();
                 
-                // Try to sync to Firestore
-                if (firebaseEnabled && db && DEVICE_ID) {
+                // Sincronizar com Firebase
+                if (firebaseOnline && metaRef) {
                     try {
-                        await db.collection('devices').doc(DEVICE_ID)
-                            .collection('config').doc('meta')
-                            .set({ valor: valor });
-                        console.log('✅ Meta salva no Firestore');
+                        await metaRef.set({ valor: valor });
+                        addDebugLog('Meta salva na nuvem: R$ ' + valor);
                     } catch (e) {
-                        console.warn('⚠️ Falha ao sincronizar meta:', e.message);
+                        addDebugLog('Falha ao salvar meta na nuvem: ' + e.message, 'warning');
                     }
                 }
                 
                 atualizarDashboardEFiltros();
                 fecharModal('modalMeta');
                 showToast(`Meta atualizada: ${formatarMoeda(valor)}`, 'success');
+                updateDebugUI('meta', 'R$ ' + valor);
             } catch (error) {
                 console.error('❌ Erro ao salvar meta:', error);
+                addDebugLog('Erro ao salvar meta: ' + error.message, 'error');
                 atualizarDashboardEFiltros();
                 fecharModal('modalMeta');
                 showToast('Meta salva localmente', 'info');
             }
         }
 
-        // UI Functions
+        // ==========================================
+        // FUNÇÕES AUXILIARES
+        // ==========================================
+
+        function mergeDados(local, nuvem) {
+            const map = new Map();
+            local.forEach(r => map.set(r.id, r));
+            nuvem.forEach(r => map.set(r.id, r));
+            return Array.from(map.values());
+        }
+
+        function carregarDadosLocais() {
+            try {
+                const dados = localStorage.getItem('driverPro_registros');
+                const meta = localStorage.getItem('driverPro_meta');
+                
+                if (dados) {
+                    registros = JSON.parse(dados);
+                }
+                if (meta) {
+                    META_MENSAL = parseFloat(meta);
+                }
+            } catch (e) {
+                console.error('Erro no cache local:', e);
+            }
+        }
+
+        function salvarDadosLocais() {
+            try {
+                localStorage.setItem('driverPro_registros', JSON.stringify(registros));
+                localStorage.setItem('driverPro_meta', META_MENSAL.toString());
+            } catch (e) {
+                console.error('Erro ao salvar local:', e);
+            }
+        }
+
+        // ==========================================
+        // DEBUG PANEL FUNCTIONS
+        // ==========================================
+
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            const toggle = document.getElementById('debugToggle');
+            
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                toggle.classList.add('hidden');
+            } else {
+                panel.style.display = 'none';
+                toggle.classList.remove('hidden');
+            }
+        }
+
+        function updateDebugUI(key, value, type = '') {
+            const element = document.getElementById('debug' + key.charAt(0).toUpperCase() + key.slice(1));
+            if (element) {
+                element.textContent = value;
+                element.className = 'debug-value ' + type;
+            }
+        }
+
+        function addDebugLog(message, type = 'info') {
+            const log = document.getElementById('debugLog');
+            const entry = document.createElement('div');
+            entry.className = 'debug-log-entry';
+            
+            const time = new Date().toLocaleTimeString('pt-BR');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            entry.textContent = `[${time}] ${prefix} ${message}`;
+            entry.style.color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#94a3b8';
+            
+            log.insertBefore(entry, log.firstChild);
+            
+            // Manter apenas últimas 20 entradas
+            while (log.children.length > 20) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        async function testarConexao() {
+            addDebugLog('Testando conexão...');
+            
+            if (!database) {
+                addDebugLog('Firebase não inicializado', 'error');
+                return;
+            }
+            
+            try {
+                const testRef = database.ref('.info/connected');
+                const snapshot = await testRef.once('value');
+                const connected = snapshot.val();
+                
+                if (connected) {
+                    addDebugLog('Conexão OK!', 'success');
+                    updateDebugUI('connection', 'Online', 'success');
+                } else {
+                    addDebugLog('Sem conexão', 'warning');
+                    updateDebugUI('connection', 'Offline', 'warning');
+                }
+            } catch (error) {
+                addDebugLog('Erro no teste: ' + error.message, 'error');
+            }
+        }
+
+        async function forcarSync() {
+            addDebugLog('Forçando sincronização...');
+            
+            if (!firebaseOnline || !registrosRef) {
+                addDebugLog('Firebase offline', 'error');
+                return;
+            }
+            
+            try {
+                // Enviar todos os registros locais para nuvem
+                const updates = {};
+                registros.forEach(r => {
+                    updates[r.id] = {
+                        timestamp: r.timestamp,
+                        data: r.data,
+                        valores: r.valores,
+                        calculados: r.calculados
+                    };
+                });
+                
+                await registrosRef.update(updates);
+                addDebugLog('Sincronização forçada: ' + registros.length + ' registros', 'success');
+            } catch (error) {
+                addDebugLog('Erro na sincronização: ' + error.message, 'error');
+            }
+        }
+
+        function limparDados() {
+            if (confirm('Tem certeza que deseja limpar TODOS os dados?')) {
+                registros = [];
+                salvarDadosLocais();
+                
+                if (firebaseOnline && registrosRef) {
+                    registrosRef.remove();
+                }
+                
+                atualizarDashboardEFiltros();
+                addDebugLog('Todos os dados limpos', 'warning');
+                showToast('Dados limpos', 'info');
+            }
+        }
+
+        // ==========================================
+        // UI FUNCTIONS (mantidas do código original)
+        // ==========================================
+
+        function atualizarSyncStatus(status) {
+            const syncStatus = document.getElementById('syncStatus');
+            const syncText = document.getElementById('syncText');
+            
+            syncStatus.className = 'sync-status';
+            
+            if (status === 'online') {
+                syncStatus.classList.add('online');
+                syncText.textContent = 'Sincronizado ☁️';
+            } else if (status === 'offline') {
+                syncStatus.classList.add('offline');
+                syncText.textContent = 'Modo offline 💾';
+            } else if (status === 'error') {
+                syncStatus.classList.add('error');
+                syncText.textContent = 'Erro de conexão ⚠️';
+            } else {
+                syncText.textContent = 'Inicializando...';
+            }
+        }
+
+        function inicializarApp() {
+            inicializarData();
+            setupValidacao();
+            setupMascaraHoras();
+            atualizarFiltroAnos();
+            atualizarDashboardEFiltros();
+        }
+
+        function inicializarData() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataRegistro').value = hoje;
+        }
+
+        function setupValidacao() {
+            const inputs = document.querySelectorAll('input[required]');
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => validarCampo(input));
+                input.addEventListener('input', () => {
+                    if (input.classList.contains('error')) {
+                        input.classList.remove('error');
+                    }
+                });
+            });
+        }
+
+        function validarCampo(input) {
+            if (!input.value || input.value <= 0) {
+                input.classList.add('error');
+                return false;
+            }
+            input.classList.remove('error');
+            return true;
+        }
+
+        function setupMascaraHoras() {
+            const input = document.getElementById('horasTrabalhadas');
+            input.addEventListener('input', (e) => {
+                let valor = e.target.value.replace(/\D/g, '');
+                if (valor.length > 4) valor = valor.slice(0, 4);
+                
+                if (valor.length >= 2) {
+                    let horas = valor.slice(0, 2);
+                    let minutos = valor.slice(2, 4);
+                    
+                    if (parseInt(horas) > 23) horas = '23';
+                    if (minutos && parseInt(minutos) > 59) minutos = '59';
+                    
+                    e.target.value = minutos ? `${horas}:${minutos}` : `${horas}:`;
+                } else {
+                    e.target.value = valor;
+                }
+            });
+        }
+
+        function horasParaDecimal(horasStr) {
+            const [horas, minutos] = horasStr.split(':').map(Number);
+            return horas + (minutos || 0) / 60;
+        }
+
+        function decimalParaHoras(decimal) {
+            const horas = Math.floor(decimal);
+            const minutos = Math.round((decimal - horas) * 60);
+            return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
+        }
+
         function mostrarResultados(registro) {
             const container = document.getElementById('resultados');
             const grid = document.getElementById('resultsGrid');
@@ -2019,7 +2386,6 @@
             }
         }
 
-        // Modal Functions
         function verDetalhes(id) {
             const registro = registros.find(r => r.id === id);
             if (!registro) return;
@@ -2167,23 +2533,6 @@
             document.getElementById('resultados').classList.remove('show');
         }
 
-        // Debug Functions
-        function updateDebug(key, value) {
-            const element = document.getElementById('debug' + key.charAt(0).toUpperCase() + key.slice(1));
-            if (element) {
-                element.textContent = key.charAt(0).toUpperCase() + key.slice(1) + ': ' + value;
-            }
-        }
-
-        // Show debug panel with Ctrl+Shift+D
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-                e.preventDefault();
-                document.getElementById('debugPanel').classList.toggle('show');
-            }
-        });
-
-        // Utilities
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
