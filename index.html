@@ -933,14 +933,13 @@
             </div>
             <p>Calculadora inteligente de ganhos para motoristas</p>
             
-            <!-- CÓDIGO DE SINCRONIZAÇÃO - BEM VISÍVEL -->
+            <!-- CÓDIGO DE SINCRONIZAÇÃO -->
             <div class="sync-box">
                 <div class="sync-label">
                     <span>🔄</span>
                     <span>SEU CÓDIGO DE SINCRONIZAÇÃO</span>
                 </div>
                 
-                <!-- O CÓDIGO APARECE AQUI AUTOMATICAMENTE -->
                 <div class="sync-code" id="syncCodeDisplay" onclick="copiarCodigo()" title="Clique para copiar">
                     ----
                 </div>
@@ -1255,34 +1254,31 @@
         let firebaseOnline = false;
         let registrosRef = null;
         let metaRef = null;
+        let listenersAtivos = [];
 
         // ==========================================
-        // CÓDIGO DE SINCRONIZAÇÃO - SISTEMA SIMPLES
+        // SISTEMA DE CÓDIGO - CORRIGIDO
         // ==========================================
 
         function gerarCodigo() {
-            // Gera 4 números aleatórios (1000-9999)
             return Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        function pegarOuCriarCodigo() {
-            // Tenta pegar código salvo no navegador
+        function obterCodigo() {
+            // Tenta pegar código salvo
             let codigo = localStorage.getItem('driverPro_codigo');
             
             if (!codigo) {
-                // Se não tem, cria um novo
+                // Se não tem, cria novo
                 codigo = gerarCodigo();
                 localStorage.setItem('driverPro_codigo', codigo);
                 console.log('🆕 Novo código criado:', codigo);
-            } else {
-                console.log('📱 Código existente:', codigo);
             }
             
             return codigo;
         }
 
-        function mostrarCodigoNaTela() {
-            // Atualiza o código em TODOS os lugares da tela
+        function mostrarCodigo() {
             const elementos = document.querySelectorAll('#syncCodeDisplay, #codigoAtualModal');
             elementos.forEach(el => {
                 if (el) el.textContent = SYNC_CODE;
@@ -1290,12 +1286,10 @@
         }
 
         function copiarCodigo() {
-            // Copia o código para área de transferência
             navigator.clipboard.writeText(SYNC_CODE).then(() => {
                 showToast('Código copiado: ' + SYNC_CODE, 'success');
             }).catch(() => {
-                // Se não conseguir copiar, mostra alerta
-                alert('Seu código é: ' + SYNC_CODE + '\n\nAnote este código!');
+                alert('Seu código é: ' + SYNC_CODE);
             });
         }
 
@@ -1305,29 +1299,183 @@
             document.getElementById('modalSyncCode').classList.add('show');
         }
 
-        function trocarCodigo() {
+        // ==========================================
+        // FUNÇÃO PRINCIPAL: TROCAR CÓDIGO E SINCRONIZAR
+        // ==========================================
+        
+        async function trocarCodigo() {
             const novoCodigo = document.getElementById('novoSyncCode').value.trim();
             
-            // Valida: deve ter exatamente 4 números
+            // Valida
             if (!/^\d{4}$/.test(novoCodigo)) {
                 alert('Digite exatamente 4 números! Exemplo: 1234');
                 return;
             }
             
-            // Salva novo código
+            // Se for o mesmo código, não faz nada
+            if (novoCodigo === SYNC_CODE) {
+                fecharModal('modalSyncCode');
+                return;
+            }
+            
+            console.log('🔄 Trocando código de', SYNC_CODE, 'para', novoCodigo);
+            
+            // 1. Remove listeners antigos
+            removerListeners();
+            
+            // 2. Atualiza código
             SYNC_CODE = novoCodigo;
             localStorage.setItem('driverPro_codigo', SYNC_CODE);
+            mostrarCodigo();
             
-            // Atualiza tela
-            mostrarCodigoNaTela();
+            // 3. Limpa dados locais (vai buscar da nuvem)
+            registros = [];
             
-            // Reconecta ao Firebase com novo código
-            conectarFirebase();
-            
-            // Fecha modal
+            // 4. Fecha modal
             fecharModal('modalSyncCode');
             
-            showToast('Código alterado para: ' + SYNC_CODE, 'success');
+            // 5. Mostra loading
+            showToast('Buscando dados da nuvem...', 'info');
+            
+            // 6. Conecta ao Firebase com NOVO código
+            await conectarFirebase();
+            
+            // 7. Força busca imediata dos dados
+            await buscarDadosDaNuvem();
+        }
+
+        function removerListeners() {
+            console.log('🧹 Removendo listeners antigos...');
+            listenersAtivos.forEach(item => {
+                if (item.ref && item.evento) {
+                    item.ref.off(item.evento);
+                }
+            });
+            listenersAtivos = [];
+        }
+
+        // ==========================================
+        // CONEXÃO FIREBASE - CORRIGIDA
+        // ==========================================
+
+        async function conectarFirebase() {
+            if (!database || !SYNC_CODE) {
+                console.error('❌ Sem database ou código');
+                return;
+            }
+            
+            console.log('☁️ Conectando ao Firebase, código:', SYNC_CODE);
+            
+            // Cria referências
+            registrosRef = database.ref('syncCodes/' + SYNC_CODE + '/registros');
+            metaRef = database.ref('syncCodes/' + SYNC_CODE + '/config/meta');
+            
+            // Listener para registros (EM TEMPO REAL)
+            const listenerRegistros = registrosRef.on('value', (snapshot) => {
+                const dados = snapshot.val();
+                console.log('📥 Dados recebidos do Firebase:', dados);
+                
+                if (dados) {
+                    // Converte objeto em array
+                    const registrosNuvem = [];
+                    Object.keys(dados).forEach(id => {
+                        registrosNuvem.push({
+                            id: id,
+                            ...dados[id]
+                        });
+                    });
+                    
+                    console.log('✅ Registros na nuvem:', registrosNuvem.length);
+                    
+                    // Junta com dados locais (nuvem tem prioridade)
+                    registros = juntarDados(registros, registrosNuvem);
+                    
+                    // Salva local
+                    salvarDadosLocais();
+                    
+                    // Atualiza tela
+                    atualizarDashboard();
+                    
+                    showToast('Sincronizado! ' + registrosNuvem.length + ' registros', 'success');
+                } else {
+                    console.log('ℹ️ Nenhum dado na nuvem para este código');
+                    // Se não tem dados na nuvem, mantém locais ou limpa
+                    if (registros.length === 0) {
+                        showToast('Nenhum dado encontrado para este código', 'info');
+                    }
+                }
+                
+                atualizarStatus('online');
+                
+            }, (erro) => {
+                console.error('❌ Erro ao buscar dados:', erro);
+                atualizarStatus('offline');
+                showToast('Erro ao sincronizar', 'error');
+            });
+            
+            listenersAtivos.push({ ref: registrosRef, evento: 'value' });
+            
+            // Listener para meta
+            const listenerMeta = metaRef.on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (dados && dados.valor) {
+                    META_MENSAL = dados.valor;
+                    localStorage.setItem('driverPro_meta', META_MENSAL);
+                    atualizarDashboard();
+                }
+            });
+            
+            listenersAtivos.push({ ref: metaRef, evento: 'value' });
+            
+            // Monitor de conexão
+            const connectedRef = database.ref('.info/connected');
+            const listenerConexao = connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    atualizarStatus('online');
+                } else {
+                    atualizarStatus('offline');
+                }
+            });
+            
+            listenersAtivos.push({ ref: connectedRef, evento: 'value' });
+        }
+
+        // Busca dados uma vez (para sincronização inicial)
+        async function buscarDadosDaNuvem() {
+            if (!registrosRef) return;
+            
+            try {
+                const snapshot = await registrosRef.once('value');
+                const dados = snapshot.val();
+                
+                if (dados) {
+                    const registrosNuvem = [];
+                    Object.keys(dados).forEach(id => {
+                        registrosNuvem.push({ id: id, ...dados[id] });
+                    });
+                    
+                    registros = registrosNuvem; // Substitui locais pelos da nuvem
+                    salvarDadosLocais();
+                    atualizarDashboard();
+                    
+                    showToast('✅ ' + registrosNuvem.length + ' registros carregados!', 'success');
+                } else {
+                    showToast('ℹ️ Código novo - começando do zero', 'info');
+                    registros = [];
+                    salvarDadosLocais();
+                    atualizarDashboard();
+                }
+            } catch (erro) {
+                console.error('Erro ao buscar:', erro);
+                showToast('Erro ao buscar dados', 'error');
+            }
+        }
+
+        function juntarDados(locais, nuvem) {
+            const mapa = new Map();
+            locais.forEach(r => mapa.set(r.id, r));
+            nuvem.forEach(r => mapa.set(r.id, r)); // Sobrescreve com dados da nuvem
+            return Array.from(mapa.values());
         }
 
         // ==========================================
@@ -1335,21 +1483,21 @@
         // ==========================================
         
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Pega ou cria código de sincronização
-            SYNC_CODE = pegarOuCriarCodigo();
-            mostrarCodigoNaTela();
+            // 1. Obtém código
+            SYNC_CODE = obterCodigo();
+            mostrarCodigo();
             
-            // 2. Carrega dados salvos no navegador
+            // 2. Carrega dados locais
             carregarDadosLocais();
             
-            // 3. Conecta ao Firebase
+            // 3. Conecta Firebase
             if (database) {
-                conectarFirebase();
+                await conectarFirebase();
             } else {
                 atualizarStatus('offline');
             }
             
-            // 4. Prepara a tela
+            // 4. Prepara formulário
             prepararFormulario();
             atualizarDashboard();
             
@@ -1360,88 +1508,6 @@
         });
 
         // ==========================================
-        // FIREBASE - CONEXÃO E SINCRONIZAÇÃO
-        // ==========================================
-
-        function conectarFirebase() {
-            if (!database || !SYNC_CODE) return;
-            
-            console.log('☁️ Conectando ao Firebase com código:', SYNC_CODE);
-            
-            // Referência: syncCodes/[CODIGO]/registros
-            registrosRef = database.ref('syncCodes/' + SYNC_CODE + '/registros');
-            metaRef = database.ref('syncCodes/' + SYNC_CODE + '/config/meta');
-            
-            // Ouve mudanças nos registros (sincronização em tempo real)
-            registrosRef.on('value', (snapshot) => {
-                const dadosDoFirebase = snapshot.val();
-                
-                if (dadosDoFirebase) {
-                    // Converte objeto em array
-                    const registrosDaNuvem = [];
-                    Object.keys(dadosDoFirebase).forEach(id => {
-                        registrosDaNuvem.push({
-                            id: id,
-                            ...dadosDoFirebase[id]
-                        });
-                    });
-                    
-                    console.log('📥 Dados recebidos do Firebase:', registrosDaNuvem.length, 'registros');
-                    
-                    // Junta dados locais com dados da nuvem (nuvem tem prioridade)
-                    registros = juntarDados(registros, registrosDaNuvem);
-                    
-                    // Salva no navegador
-                    salvarDadosLocais();
-                    
-                    // Atualiza tela
-                    atualizarDashboard();
-                    
-                    showToast('Sincronizado! ' + registrosDaNuvem.length + ' registros', 'success');
-                }
-                
-                atualizarStatus('online');
-                
-            }, (erro) => {
-                console.error('❌ Erro Firebase:', erro);
-                atualizarStatus('offline');
-            });
-            
-            // Ouve mudanças na meta
-            metaRef.on('value', (snapshot) => {
-                const dados = snapshot.val();
-                if (dados && dados.valor) {
-                    META_MENSAL = dados.valor;
-                    localStorage.setItem('driverPro_meta', META_MENSAL);
-                    atualizarDashboard();
-                }
-            });
-            
-            // Monitora conexão
-            database.ref('.info/connected').on('value', (snap) => {
-                if (snap.val() === true) {
-                    atualizarStatus('online');
-                } else {
-                    atualizarStatus('offline');
-                }
-            });
-        }
-
-        function juntarDados(locais, nuvem) {
-            // Cria um mapa com todos os dados
-            const mapa = new Map();
-            
-            // Adiciona locais
-            locais.forEach(r => mapa.set(r.id, r));
-            
-            // Adiciona da nuvem (sobrescreve locais se tiver mesmo ID)
-            nuvem.forEach(r => mapa.set(r.id, r));
-            
-            // Converte de volta para array
-            return Array.from(mapa.values());
-        }
-
-        // ==========================================
         // OPERAÇÕES COM REGISTROS
         // ==========================================
 
@@ -1449,7 +1515,7 @@
             const btn = document.getElementById('btnCalcular');
             btn.disabled = true;
             
-            // Valida campos
+            // Valida
             const campos = ['dataRegistro', 'kmTotal', 'consumo', 'precoCombustivel', 'ganhoTotal', 'horasTrabalhadas'];
             let valido = true;
             
@@ -1469,7 +1535,7 @@
                 return;
             }
 
-            // Pega valores
+            // Coleta dados
             const data = document.getElementById('dataRegistro').value;
             const kmTotal = parseFloat(document.getElementById('kmTotal').value);
             const consumo = parseFloat(document.getElementById('consumo').value);
@@ -1477,7 +1543,6 @@
             const ganhoTotal = parseFloat(document.getElementById('ganhoTotal').value);
             const horasInput = document.getElementById('horasTrabalhadas').value;
             
-            // Converte horas (08:30 -> 8.5)
             const [h, m] = horasInput.split(':').map(Number);
             const horasTrabalhadas = h + (m || 0) / 60;
 
@@ -1485,8 +1550,6 @@
             const litros = kmTotal / consumo;
             const gastoCombustivel = litros * precoCombustivel;
             const lucroLiquido = ganhoTotal - gastoCombustivel;
-            const ganhoPorHora = lucroLiquido / horasTrabalhadas;
-            const ganhoPorKm = ganhoTotal / kmTotal;
 
             const novoRegistro = {
                 timestamp: new Date(data).getTime(),
@@ -1502,20 +1565,19 @@
                     litros: litros,
                     custoCombustivel: gastoCombustivel,
                     lucroLiquido: lucroLiquido,
-                    ganhoPorHora: ganhoPorHora,
-                    ganhoPorKm: ganhoPorKm
+                    ganhoPorHora: lucroLiquido / horasTrabalhadas,
+                    ganhoPorKm: ganhoTotal / kmTotal
                 }
             };
 
             try {
                 if (registroEditando) {
-                    // Edita existente
+                    // Edita
                     const index = registros.findIndex(r => r.id === registroEditando);
                     if (index !== -1) {
                         registros[index] = { ...novoRegistro, id: registroEditando };
                     }
                     
-                    // Envia para Firebase
                     if (registrosRef) {
                         await registrosRef.child(registroEditando).set(novoRegistro);
                     }
@@ -1527,7 +1589,6 @@
                     const id = Date.now().toString();
                     registros.push({ ...novoRegistro, id: id });
                     
-                    // Envia para Firebase
                     if (registrosRef) {
                         await registrosRef.child(id).set(novoRegistro);
                     }
@@ -1535,10 +1596,7 @@
                     showToast('Registro salvo!', 'success');
                 }
 
-                // Salva local
                 salvarDadosLocais();
-                
-                // Mostra resultados
                 mostrarResultados(novoRegistro);
                 atualizarDashboard();
                 limparFormulario();
@@ -1553,11 +1611,9 @@
 
         async function deletarRegistro(id) {
             try {
-                // Remove do array
                 registros = registros.filter(r => r.id !== id);
                 salvarDadosLocais();
                 
-                // Remove do Firebase
                 if (registrosRef) {
                     await registrosRef.child(id).remove();
                 }
@@ -1581,7 +1637,6 @@
             META_MENSAL = valor;
             localStorage.setItem('driverPro_meta', META_MENSAL);
             
-            // Salva no Firebase
             if (metaRef) {
                 await metaRef.set({ valor: valor });
             }
@@ -1634,10 +1689,8 @@
         }
 
         function prepararFormulario() {
-            // Data de hoje
             document.getElementById('dataRegistro').value = new Date().toISOString().split('T')[0];
             
-            // Máscara de horas
             document.getElementById('horasTrabalhadas').addEventListener('input', (e) => {
                 let v = e.target.value.replace(/\D/g, '');
                 if (v.length > 4) v = v.slice(0, 4);
@@ -1693,7 +1746,6 @@
                 filtrados = filtrados.filter(r => new Date(r.data).getFullYear() === parseInt(anoFiltro));
             }
 
-            // Calcula totais
             const hoje = new Date().toISOString().split('T')[0];
             const regHoje = registros.find(r => r.data === hoje);
             const totalHoje = regHoje ? regHoje.calculados.lucroLiquido : 0;
@@ -1708,7 +1760,6 @@
             
             const progressoMeta = Math.min((totalMes / META_MENSAL) * 100, 100);
             
-            // Atualiza cards
             document.getElementById('resumoHoje').textContent = formatarMoeda(totalHoje);
             document.getElementById('resumoMedia').textContent = formatarMoeda(mediaDia);
             document.getElementById('resumoMeta').textContent = progressoMeta.toFixed(0) + '%';
@@ -1716,7 +1767,6 @@
             document.getElementById('metaProgressBar').style.width = progressoMeta + '%';
             document.getElementById('resumoAno').textContent = formatarMoeda(totalAno);
             
-            // Atualiza lista
             renderizarLista(filtrados);
             atualizarGrafico(filtrados);
             atualizarFiltroAnos();
